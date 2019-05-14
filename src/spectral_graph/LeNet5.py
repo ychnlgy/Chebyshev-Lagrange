@@ -1,6 +1,6 @@
 import torch, math
 
-from . import lib
+from . import speclib
 
 class LeNet5(torch.nn.Module):
 

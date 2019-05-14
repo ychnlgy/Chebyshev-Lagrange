@@ -1,2 +1,2 @@
-from . import lib
+from . import speclib
 from .LeNet5 import LeNet5
