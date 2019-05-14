@@ -23,7 +23,7 @@ def main(datadir, graph, download=0, device="cuda"):
     model = Model().to(device)
 
     batchsize = 100
-    augment = False
+    augment = True
 
     trainloader, testloader, _, _, _ = datasets.mnist.get(datadir, augment, batchsize, download)
 

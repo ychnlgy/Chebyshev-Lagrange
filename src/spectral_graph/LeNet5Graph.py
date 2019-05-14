@@ -35,8 +35,6 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
-        if X.abs().max() > 1:
-            print(X.abs().max())
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         X1 = SparseMM().forward(self.L, X0)
         Xs = list(self.iter_chebyshev_X(X0, X1))
