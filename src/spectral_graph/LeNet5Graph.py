@@ -27,9 +27,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
         #L = speclib.coarsening.rescale_L(laplacian, lmax)
 
         L = laplacian
+        print(L.shape)
 
         L = L.tocoo()
-        print(len(L.col))
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
