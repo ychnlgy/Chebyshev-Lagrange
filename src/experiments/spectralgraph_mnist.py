@@ -29,7 +29,7 @@ def main(datadir, graph, download=0, device="cuda"):
     epochs = 20
 
     lossf = torch.nn.CrossEntropyLoss()
-    optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
+    optim = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4)
     sched = torch.optim.lr_scheduler.ExponentialLR(optim, gamma=0.95)
 
     trainloss_avg = util.MovingAverage(momentum=0.99)
