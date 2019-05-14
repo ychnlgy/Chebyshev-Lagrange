@@ -34,7 +34,7 @@ def main(datadir, download=0):
 
         model.train()
         
-        with tqdm.tqdm(trainloader, ncols=80):
+        with tqdm.tqdm(trainloader, ncols=80) as bar:
             for x, y in bar:
                 yh = model(x)
                 loss = lossf(yh, y)
