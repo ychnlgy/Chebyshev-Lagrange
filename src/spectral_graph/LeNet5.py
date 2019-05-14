@@ -19,7 +19,7 @@ class LeNet5(torch.nn.Module):
 
         fc1fin = cl2_f*(nx//4)**2
 
-        maxpool = torch.nn.MaxPool2d(2)
+        maxpool = torch.nn.MaxPool2d(2, 2)
         relu = torch.nn.ReLU()
 
         self.cnn = torch.nn.Sequential(
@@ -30,20 +30,18 @@ class LeNet5(torch.nn.Module):
             self._create_conv(cl1_f, cl2_f, cl2_k),
             relu,
             maxpool,
-
-            self._create_conv(fc1fin, fc1, 1),
-            relu,
-            torch.nn.AvgPool2d(7),
-            
-            torch.nn.Dropout(0.5),
         )
 
-        self.fc = self._create_fc(fc1, fc2)
+        self.net = torch.nn.Sequential(
+            self._create_fc(fc1fin, fc1),
+            relu,
+            torch.nn.Dropout(0.5),
+            self._create_fc(fc1, fc2)
+        )
 
     def forward(self, X):
-        conv = self.cnn(X)
-        v = conv.view(-1, conv.size(1))
-        return self.fc(v)
+        conv = self.cnn(X).view(X.size(0), -1)
+        return self.net(conv)
 
     def _create_conv(self, f1, f2, k):
         conv = torch.nn.Conv2d(f1, f2, k, padding=(2, 2))
