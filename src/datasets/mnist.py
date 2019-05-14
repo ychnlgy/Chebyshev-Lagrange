@@ -13,7 +13,7 @@ def get(savedir, batchsize, download=0, numworkers=2):
             train = True,
             download = download,
             transform = transforms.Compose([
-                transforms.RandomCrop(size=IMAGESIZE, padding=2),
+                #transforms.RandomCrop(size=IMAGESIZE, padding=2),
                 transforms.ToTensor()
             ])
         ),
