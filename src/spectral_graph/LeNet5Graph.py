@@ -20,7 +20,6 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
-        print(self.L)
         self.K = K
 
     def scale_laplacian(self, laplacian):
@@ -30,6 +29,8 @@ class ChebyshevGraphConv(torch.nn.Linear):
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
+
+        print(L_data.abs().max())
 
         L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
         return L
