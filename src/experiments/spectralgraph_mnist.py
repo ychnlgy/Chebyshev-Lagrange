@@ -1,4 +1,4 @@
-import tqdm
+import tqdm, torch
 
 from .. import spectral_graph, datasets, util
 
