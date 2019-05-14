@@ -1,19 +1,23 @@
 import torch
 from torchvision import datasets, transforms
 
-def get(savedir, batchsize, download=0, numworkers=2):
+def get(savedir, augment, batchsize, download=0, numworkers=2):
     
     CLASSES = 10
     CHANNELS = 1
     IMAGESIZE = 28
+
+    augmentation = [
+        [],
+        [transforms.RandomCrop(size=IMAGESIZE, padding=2)]
+    ][augment]
     
     train = torch.utils.data.DataLoader(
         datasets.MNIST(
             root = savedir,
             train = True,
             download = download,
-            transform = transforms.Compose([
-                #transforms.RandomCrop(size=IMAGESIZE, padding=2),
+            transform = transforms.Compose(augmentation + [
                 transforms.ToTensor()
             ])
         ),
