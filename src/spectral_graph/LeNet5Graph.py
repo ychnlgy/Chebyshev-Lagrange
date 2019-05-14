@@ -20,7 +20,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
-        print(self.L.max())
+        print(self.L)
         self.K = K
 
     def scale_laplacian(self, laplacian):
