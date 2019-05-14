@@ -19,6 +19,8 @@ def main(experiment, **kwargs):
         for key, val in sorted(options.items()):
             print(key, val.main.__doc__)
 
+        raise SystemExit(1)
+
     options[experiment].main(**kwargs)
 
     
