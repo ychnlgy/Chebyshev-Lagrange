@@ -96,7 +96,7 @@ class LeNet5Graph(torch.nn.Module):
         )
 
     def transform_data(self, X):
-        return lib.coarsening.perm_data(X, self.perm)
+        return speclib.coarsening.perm_data(X, self.perm)
             
     def forward(self, X):
         N, C, W, H = X.size()
