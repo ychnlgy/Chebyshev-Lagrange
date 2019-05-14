@@ -3,10 +3,10 @@ import scipy.sparse, scipy.sparse.linalg  # scipy.spatial.distance
 import numpy as np
 
 
-def grid_graph(grid_side,number_edges,metric):
+def grid_graph(grid_side,number_edges):
     """Generate graph of a grid"""
     z = grid(grid_side)
-    dist, idx = distance_sklearn_metrics(z, k=number_edges, metric=metric)
+    dist, idx = distance_sklearn_metrics(z, k=number_edges)
     A = adjacency(dist, idx)
     print("nb edges: ",A.nnz)
     return A
@@ -24,7 +24,7 @@ def grid(m, dtype=np.float32):
     return z
 
 
-def distance_sklearn_metrics(z, k=4, metric='euclidean'):
+def distance_sklearn_metrics(z, k=4):
     """Compute pairwise distances"""
     #d = sklearn.metrics.pairwise.pairwise_distances(z, metric=metric, n_jobs=1)
     d = scipy.spatial.distance.squareform(scipy.spatial.distance.pdist(z))

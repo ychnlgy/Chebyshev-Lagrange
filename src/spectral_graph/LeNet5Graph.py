@@ -72,7 +72,7 @@ class LeNet5Graph(torch.nn.Module):
         coarsening_levels = 4
     ):
         super().__init__()
-        L = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
+        L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
         fc1fin = cl2_f1*(D//16)
 
@@ -94,14 +94,23 @@ class LeNet5Graph(torch.nn.Module):
             torch.nn.Dropout(0.5),
             LeNet5.create_fc(fc1, fc2)
         )
+
+    def transform_data(self, X):
+        return lib.coarsening.perm_data(X, self.perm)
             
     def forward(self, X):
         N, C, W, H = X.size()
-        X = X.view(N, W*H, 1)
+        assert C == 1
+        X = self.transform_data(X.view(N, W*H))
         conv = self.cnn(X).view(X.size(0), -1)
         return self.net(conv)
 
     # === PROTECTED ===
+
+    def generate_laplacian(self, gridsize, number_edges, coarsening_levels):
+        print("Generating Laplacians...")
+        A = lib.grid_graph.grid_graph(gridsize, number_edges)
+        return lib.coarsening.coarsen(A, coarsening_levels)
 
     def create_conv(self, f1, f2, k, laplacian):
         conv = ChebyshevGraphConv(laplacian, k, f1, f2)
