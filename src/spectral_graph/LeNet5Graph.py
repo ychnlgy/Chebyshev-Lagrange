@@ -40,9 +40,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def forward(self, X):
         N, C, L = X.size()
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        print(self.L.shape, X0.shape)
-        input()
         X1 = SparseMM().forward(self.L, X0)
+        print(X1.shape)
+        input()
         Xs = list(self.iter_chebyshev_X(X0, X1))
         out = torch.stack([X0, X1] + Xs, dim=0)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
