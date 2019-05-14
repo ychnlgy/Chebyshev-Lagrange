@@ -58,7 +58,7 @@ class LeNet5(torch.nn.Module):
 
     def _init_module(self, mod, fin, fout):
         scale = math.sqrt(2.0/(fin+fout))
-        mod.weight.data.uniform(-scale, scale)
+        mod.weight.data.uniform_(-scale, scale)
         mod.bias.data.fill_(0)
         return mod
         
