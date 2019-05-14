@@ -40,6 +40,8 @@ def main(datadir, graph, download=0, device="cuda"):
         
         with tqdm.tqdm(trainloader, ncols=80) as bar:
             for x, y in bar:
+                print(x.max(), x.min())
+                input()
                 x = x.to(device)
                 y = y.to(device)
                 yh = model(x)
