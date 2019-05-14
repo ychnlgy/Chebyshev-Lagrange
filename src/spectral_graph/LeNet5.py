@@ -19,7 +19,7 @@ class LeNet5(torch.nn.Module):
 
         fc1fin = cl2_f*(nx//4)**2
 
-        maxpool = torch.nn.MaxPool2d()
+        maxpool = torch.nn.MaxPool2d(2, 2)
         relu = torch.nn.ReLU()
 
         self.cnn = torch.nn.Sequential(
