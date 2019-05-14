@@ -60,7 +60,7 @@ class LeNet5Graph(torch.nn.Module):
 
     def __init__(
         self,
-        D = 28*28, 
+        D = 944, 
         cl1_f = 32,
         cl1_k = 25,
         cl2_f = 64,
@@ -110,7 +110,6 @@ class LeNet5Graph(torch.nn.Module):
     # === PROTECTED ===
 
     def generate_laplacian(self, gridsize, number_edges, coarsening_levels):
-        print("Generating Laplacians...")
         A = speclib.grid_graph.grid_graph(gridsize, number_edges)
         return speclib.coarsening.coarsen(A, coarsening_levels)
 
