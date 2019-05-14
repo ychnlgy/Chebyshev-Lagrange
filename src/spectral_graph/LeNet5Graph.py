@@ -103,7 +103,7 @@ class LeNet5Graph(torch.nn.Module):
     def forward(self, X):
         N, C, W, H = X.size()
         assert C == 1
-        X = self.transform_data(X.view(N, W*H))
+        X = self.transform_data(X.view(N, W*H)).unsqueeze(-1)
         conv = self.cnn(X).view(X.size(0), -1)
         return self.net(conv)
 
