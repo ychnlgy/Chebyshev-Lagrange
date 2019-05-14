@@ -24,10 +24,10 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def scale_laplacian(self, laplacian):
         lmax = speclib.coarsening.lmax_L(laplacian)
-        print(laplacian.abs().max())
+        print(lmax)
         L = speclib.coarsening.rescale_L(laplacian, lmax)
-        print(L.abs().max())
-        input()
+        #print(L.abs().max())
+        #input()
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
