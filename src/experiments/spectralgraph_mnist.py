@@ -27,7 +27,7 @@ def main(datadir, download=0, device="cuda"):
 
     lossf = torch.nn.CrossEntropyLoss()
     optim = torch.optim.SGD(model.parameters(), lr=0.05, weight_decay=5e-4)
-    sched = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=epochs)
+    sched = torch.optim.lr_scheduler.ExponentialLR(optim, gamma=0.95)
 
     trainloss_avg = util.MovingAverage(momentum=0.99)
 
@@ -63,5 +63,5 @@ def main(datadir, download=0, device="cuda"):
                 acc += (yh.max(dim=1)[1] == y).float().sum().item()
                 n += len(yh)
 
-        sys.stderr.write("Test accuracy: %.3f\n" % (acc/n))
+        sys.stderr.write("Test accuracy: %.2f\n" % (acc/n*100.0))
         
