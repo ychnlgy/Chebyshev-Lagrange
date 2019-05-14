@@ -1,4 +1,4 @@
-import sklearn
+import scipy
 import scipy.sparse, scipy.sparse.linalg  # scipy.spatial.distance
 import numpy as np
 
@@ -26,8 +26,8 @@ def grid(m, dtype=np.float32):
 
 def distance_sklearn_metrics(z, k=4, metric='euclidean'):
     """Compute pairwise distances"""
-    #d = sklearn.metrics.pairwise.pairwise_distances(z, metric=metric, n_jobs=-2)
-    d = sklearn.metrics.pairwise.pairwise_distances(z, metric=metric, n_jobs=1)
+    #d = sklearn.metrics.pairwise.pairwise_distances(z, metric=metric, n_jobs=1)
+    d = scipy.spatial.distance.squareform(scipy.spatial.distance.pdist(z))
     # k-NN
     idx = np.argsort(d)[:,1:k+1]
     d.sort()
