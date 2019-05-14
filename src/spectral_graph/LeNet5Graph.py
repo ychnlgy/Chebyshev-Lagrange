@@ -109,8 +109,8 @@ class LeNet5Graph(torch.nn.Module):
 
     def generate_laplacian(self, gridsize, number_edges, coarsening_levels):
         print("Generating Laplacians...")
-        A = lib.grid_graph.grid_graph(gridsize, number_edges)
-        return lib.coarsening.coarsen(A, coarsening_levels)
+        A = speclib.grid_graph.grid_graph(gridsize, number_edges)
+        return speclib.coarsening.coarsen(A, coarsening_levels)
 
     def create_conv(self, f1, f2, k, laplacian):
         conv = ChebyshevGraphConv(laplacian, k, f1, f2)
