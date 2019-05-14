@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.sparse
-import sklearn.metrics
 
 
 def laplacian(W, normalized=True):

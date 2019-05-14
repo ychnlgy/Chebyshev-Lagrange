@@ -1,5 +1,4 @@
 import sklearn
-import sklearn.metrics
 import scipy.sparse, scipy.sparse.linalg  # scipy.spatial.distance
 import numpy as np
 
