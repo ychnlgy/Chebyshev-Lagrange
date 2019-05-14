@@ -2,7 +2,7 @@ import tqdm, torch, sys
 
 from .. import spectral_graph, datasets, util
 
-def main(datadir, download=0):
+def main(datadir, download=0, device="cuda"):
 
     '''
 
@@ -11,12 +11,13 @@ def main(datadir, download=0):
         download - int or str, represents bool of whether the dataset
             should be downloaded if it is not already downloaded.
             Default: 0.
+        device - str device to load model and data.
 
     '''
 
     download = int(download)
 
-    model = spectral_graph.LeNet5()
+    model = spectral_graph.LeNet5().to(device)
 
     batchsize = 100
 
@@ -36,6 +37,8 @@ def main(datadir, download=0):
         
         with tqdm.tqdm(trainloader, ncols=80) as bar:
             for x, y in bar:
+                x = x.to(device)
+                y = y.to(device)
                 yh = model(x)
                 loss = lossf(yh, y)
                 optim.zero_grad()
@@ -54,6 +57,8 @@ def main(datadir, download=0):
         
         with torch.no_grad():
             for x, y in testloader:
+                x = x.to(device)
+                y = y.to(device)
                 yh = model(x)
                 acc += (yh.max(dim=1)[1] == y).float().sum().item()
                 n += len(yh)
