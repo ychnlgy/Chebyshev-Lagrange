@@ -44,7 +44,7 @@ def main(datadir, download=0):
 
                 trainloss_avg.update(loss.item())
 
-                bar.set_description("[E%d] %.5f" % (epoch, trainloss.peek()))
+                bar.set_description("[E%d] %.5f" % (epoch, trainloss_avg.peek()))
 
         sched.step()
 
