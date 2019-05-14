@@ -2,12 +2,13 @@ import tqdm, torch, sys
 
 from .. import spectral_graph, datasets, util
 
-def main(datadir, download=0, device="cuda"):
+def main(datadir, graph, download=0, device="cuda"):
 
     '''
 
     Input:
         datadir - str path to where the MNIST dataset should be stored.
+        graph - int or str, represents bool of whether to graph version or not.
         download - int or str, represents bool of whether the dataset
             should be downloaded if it is not already downloaded.
             Default: 0.
@@ -16,8 +17,10 @@ def main(datadir, download=0, device="cuda"):
     '''
 
     download = int(download)
+    graph = int(graph)
 
-    model = spectral_graph.LeNet5().to(device)
+    Model = [spectral_graph.LeNet5, spectral_graph.LeNet5Graph][graph]
+    model = Model().to(device)
 
     batchsize = 100
 

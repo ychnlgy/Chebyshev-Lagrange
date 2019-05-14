@@ -1,7 +1,5 @@
 import torch, math
 
-from . import speclib
-
 class LeNet5(torch.nn.Module):
 
     def __init__(
@@ -19,41 +17,47 @@ class LeNet5(torch.nn.Module):
 
         fc1fin = cl2_f*(nx//4)**2
 
-        maxpool = torch.nn.MaxPool2d(2, 2)
         relu = torch.nn.ReLU()
 
         self.cnn = torch.nn.Sequential(
-            self._create_conv(1, cl1_f, cl1_k),
+            LeNet5.create_conv(1, cl1_f, cl1_k),
             relu,
-            maxpool,
+            LeNet5.create_pool(),
             
-            self._create_conv(cl1_f, cl2_f, cl2_k),
+            self.create_conv(cl1_f, cl2_f, cl2_k),
             relu,
-            maxpool,
+            LeNet5.create_pool(),
         )
 
         self.net = torch.nn.Sequential(
-            self._create_fc(fc1fin, fc1),
+            LeNet5.create_fc(fc1fin, fc1),
             relu,
             torch.nn.Dropout(0.5),
-            self._create_fc(fc1, fc2)
+            LeNet5.create_fc(fc1, fc2)
         )
 
     def forward(self, X):
         conv = self.cnn(X).view(X.size(0), -1)
         return self.net(conv)
 
-    def _create_conv(self, f1, f2, k):
+    @staticmethod
+    def create_conv(f1, f2, k):
         conv = torch.nn.Conv2d(f1, f2, k, padding=(2, 2))
         fin = f1*k**2
         fout = f2
-        return self._init_module(conv, fin, fout)
+        return LeNet5.init_module(conv, fin, fout)
 
-    def _create_fc(self, f1, f2):
+    @staticmethod
+    def create_pool():
+        return torch.nn.MaxPool2d(2, 2)
+
+    @staticmethod
+    def create_fc(f1, f2):
         fc = torch.nn.Linear(f1, f2)
-        return self._init_module(fc, f1, f2)
+        return LeNet5.init_module(fc, f1, f2)
 
-    def _init_module(self, mod, fin, fout):
+    @staticmethod
+    def init_module(mod, fin, fout):
         scale = math.sqrt(2.0/(fin+fout))
         mod.weight.data.uniform_(-scale, scale)
         mod.bias.data.fill_(0)
