@@ -104,7 +104,7 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.RegActivation(4, d_in//K, n_degree=K-1, d_out=d_out)
+        self.act = modules.polynomial.LinkActivation(4, d_in//K, n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
@@ -141,9 +141,9 @@ class LeNet5Graph(torch.nn.Module):
         node,
         D = 944, 
         cl1_f = 16,
-        cl1_k = 3,
+        cl1_k = 10,
         cl2_f = 32,
-        cl2_k = 3,
+        cl2_k = 10,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
