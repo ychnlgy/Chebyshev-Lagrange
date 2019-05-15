@@ -85,6 +85,8 @@ class ChebyshevGraphConv(torch.nn.Linear):
         out = out.transpose(0, 1).contiguous()
         out = self.act.basis(out)
         out = out.view(L*N, C*self.K)
+        print(out.shape)
+        input()
         out = super().forward(out).view(L, N, -1)
         out = out.permute(1, 2, 0).contiguous()
         return out#super().forward(out).view(N, C, -1)
