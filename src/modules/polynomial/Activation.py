@@ -14,7 +14,7 @@ class Activation(torch.nn.Module):
             chebyshev.get_nodes(self.n, -self.radius, self.radius)
         )
         self.weight = torch.nn.Parameter(
-            torch.zeros(1, self.d, self.n, self.t, 1)
+            torch.FloatTensor(1, self.d, self.n, self.t, 1)
         )
 
         self.reset_parameters()
@@ -37,7 +37,9 @@ class Activation(torch.nn.Module):
         D = X.size(1)
         S = X.shape[2:]
         
-        B = self.basis(X.view(N, D, -1)).unsqueeze(3) # (N, D, n, -1)
+        B = self.basis(X.view(N, D, -1)).unsqueeze(3) # (N, D, n, 1, -1)
+        print(B.size(), self.weight.size())
+        input()
         L = (self.weight * B).sum(dim=2).sum(dim=1)
         return L.view(N, self.t, *S)
 
