@@ -51,10 +51,10 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)
-        print(w.shape, b.shape)
-        input()
         w = w.view(1, -1, *([1]*e))
         b = b.view(1, -1, *([1]*e))
+        print(X.size(), w.size(), b.size())
+        input()
         return X*w + b
 
     def _regress(self, slc, endi):
@@ -62,14 +62,10 @@ class RegActivation(Activation):
         y = self.weight[0,:,slc,:,0].transpose(0, -1).contiguous().squeeze(-1) # D, d, D'
         w = self.calc_weight(slc, x, y)
 
-        print(w.size())
-
         # we want the discontinuous function to
         # still appear as continuous as possible,
         # so we connect the linear regression to
         # the last point at which the polynomial stops.
         b = y[:,endi].unsqueeze(-1)-w*x[:,endi].unsqueeze(-1)
-        print(b.size())
-        input()
         assert w.size() == b.size()
         return w, b
