@@ -28,11 +28,11 @@ class PolyGraphConv(torch.nn.Linear):
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, L):
-        print(L.max(), L.min())
-        lmax = speclib.coarsening.lmax_L(L)
-        L = speclib.coarsening.rescale_L(L, lmax)
+        #print(L.max(), L.min())
+        #lmax = speclib.coarsening.lmax_L(L)
+        #L = speclib.coarsening.rescale_L(L, lmax)
 
-        print(L.max(), L.min())
+        #print(L.max(), L.min())
 
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
