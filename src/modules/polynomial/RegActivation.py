@@ -35,13 +35,11 @@ class RegActivation(Activation):
         L = (self.weight * B).sum(dim=2) # (N, D, D', -1)
 
         dl = self._do_regress(X, *regress_l)
-        print(dl.shape, requires_regress_l.shape)
-        input()
         L[requires_regress_l.expand_as(L)] = dl[requires_regress_l.expand_as(dl)]
         dr = self._do_regress(X, *regress_r)
         L[requires_regress_r.expand_as(L)] = dr[requires_regress_r.expand_as(dr)]
         
-        return L.view(N, self.t, *X_in.shape[2:])
+        return L.sum(dim=1).view(N, self.t, *X_in.shape[2:])
 
     # === PROTECTED ===
 
