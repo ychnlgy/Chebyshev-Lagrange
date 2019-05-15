@@ -70,7 +70,10 @@ class NodeGraphConv(torch.nn.Linear):
         #L = speclib.coarsening.rescale_L(L, lmax)
         L = L
 
+        print(L.max(), L.min())
+
         L = L.tocoo() # we do no
+        
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
