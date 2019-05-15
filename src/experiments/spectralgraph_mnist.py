@@ -47,6 +47,8 @@ def main(datadir, graph, download=0, device="cuda"):
                 loss = lossf(yh, y)
                 optim.zero_grad()
                 loss.backward()
+                print(model.cnn[0].act.weight.grad)
+                input()
                 optim.step()
 
                 trainloss_avg.update(loss.item())
