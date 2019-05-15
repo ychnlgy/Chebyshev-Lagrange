@@ -146,7 +146,7 @@ class LeNet5Graph(torch.nn.Module):
         super().__init__()
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
-        fc1fin = 59#cl2_f*(D//16)
+        fc1fin = cl2_f*(D//16)
 
         relu = torch.nn.ReLU()
 
