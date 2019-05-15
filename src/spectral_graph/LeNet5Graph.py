@@ -55,8 +55,8 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
 class ChebyshevGraphConv(torch.nn.Linear):
 
-    def __init__(self, laplacian, K, *args, **kwargs):
-        super().__init__(*args, bias=False, **kwargs)
+    def __init__(self, laplacian, K, f1, f2, **kwargs):
+        super().__init__(f1//K, f2, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
         self.K = K
         self.act = modules.polynomial.Activation(self.L.size(0), K-1)
@@ -80,7 +80,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         X1 = torch.mm(self.L, X0)#X1 = SparseMM().forward(self.L, X0)
         X1 = X1.view(C, L, N).permute(2, 0, 1).contiguous().view(N, C*L)
         #Xs = list(self.iter_chebyshev_X(X0, X1))
-        out = self.act(X1)#torch.stack([X0, X1] + Xs, dim=0)
+        out = self.act(X1).view(N, C, L)#torch.stack([X0, X1] + Xs, dim=0)
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
