@@ -86,6 +86,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         print(new)
 
         print(new.requires_grad)
+        print(self.act.weight.grad)
         input()
         
         
