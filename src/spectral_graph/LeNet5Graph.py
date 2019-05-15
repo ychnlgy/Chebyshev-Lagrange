@@ -25,15 +25,10 @@ class PolyGraphConv(torch.nn.Linear):
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
         self.K = K
-        #self.poly = modules.polynomial.LinkActivation(2, d_in, n_degree=3, zeros=False)
-        #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, L):
-        #print(L.max(), L.min())
         lmax = speclib.coarsening.lmax_L(L)
         L = speclib.coarsening.rescale_L(L, lmax)
-
-        #print(L.max(), L.min())
 
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
@@ -51,7 +46,6 @@ class PolyGraphConv(torch.nn.Linear):
         out = torch.stack([X0, X1] + Xs, dim=0)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         out = out.view(N*C, L*self.K)
-        #out = self.poly(out)
         return super().forward(out).view(N, C, -1)
 
     def iter_chebyshev_X(self, X0, X1):
@@ -65,13 +59,14 @@ class NodeGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
         super().__init__(d_in, d_out, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
+        self.L.requires_grad = False
         self.K = K
         self.dout = d_out
         values = self.L._values()
         self.act = modules.polynomial.LagrangeBasis.create(
             modules.polynomial.chebyshev.get_nodes(K, values.min(), values.max())
         )
-        print(values.min(), values.max())
+        print("Chebyshev nodes scaled to range [%.3f, %.3f]." % (values.min(), values.max()))
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
@@ -105,66 +100,6 @@ class NodeGraphConv(torch.nn.Linear):
         out = SparseMM().forward(pL, X0) # K*C, L*N
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
-
-class ReLUGraphConv(torch.nn.Linear):
-
-    def __init__(self, laplacian, K, d_in, d_out, **kwargs):
-        super().__init__(d_in//K, d_out, bias=False, **kwargs)
-
-    def forward(self, X):
-        N, C, L = X.size()
-        return torch.nn.functional.relu(super().forward(X.view(N*C, L))).view(N, C, -1)
-
-import matplotlib
-matplotlib.use("agg")
-from matplotlib import pyplot
-
-import os
-
-class ExptGraphConv(torch.nn.Linear):
-
-    def __init__(self, laplacian, K, d_in, d_out, **kwargs):
-        super().__init__(d_in//K, d_out, bias=False, **kwargs)
-        self.register_buffer("L", self.scale_laplacian(laplacian))
-        self.K = K
-        self.dout = d_out
-        values = self.L._values()
-        self.cut = None
-        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
-
-    def scale_laplacian(self, L):
-        #lmax = speclib.coarsening.lmax_L(L)
-        #L = speclib.coarsening.rescale_L(L, lmax)
-        
-        L = L.tocoo()
-        
-        indices = numpy.column_stack((L.row, L.col)).T
-        indices = torch.from_numpy(indices).long()
-        L_data = torch.from_numpy(L.data).float()
-
-        pyplot.hist(L.data, bins=100)
-
-        i = 0
-        fname = lambda j: "laplacians-%d.png" % j
-        while os.path.isfile(fname(i)):
-            i += 1
-        pyplot.savefig(fname(i))
-        pyplot.clf()
-
-        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
-        return L.coalesce()
-
-    def forward(self, X):
-        N, C, L = X.size()
-
-        #pL = self.L.clone()
-        #pL._values()[:] = self.act(self.L._values().unsqueeze(0)).view(-1)
-        
-        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(self.L, X0) # C, L*N
-        out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
-        out = self.act(out).view(N, C, -1)
-        return out#super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 

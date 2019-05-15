@@ -29,15 +29,15 @@ def main(datadir, graph, node, download=0, device="cuda"):
     print("Parameters: %d" % sum(torch.numel(p) for p in model.parameters() if p.requires_grad))
 
     batchsize = 100
-    augment = True
+    augment = False
 
     trainloader, testloader, _, _, _ = datasets.mnist.get(datadir, augment, batchsize, download)
 
-    epochs = 20
+    epochs = 100
 
     lossf = torch.nn.CrossEntropyLoss()
-    optim = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=1e-4)
-    sched = torch.optim.lr_scheduler.ExponentialLR(optim, gamma=0.95)
+    optim = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-6)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=epochs)#ExponentialLR(optim, gamma=0.95)
 
     trainloss_avg = util.MovingAverage(momentum=0.99)
 
