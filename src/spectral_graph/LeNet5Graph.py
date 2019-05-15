@@ -135,16 +135,16 @@ class LeNet5Graph(torch.nn.Module):
 
         self.cnn = torch.nn.Sequential(
             self.create_conv(cl1_k, cl1_f, cl1_k, L[0]),
-            modules.Reshape(cl1_f),
+            modules.Reshape(cl1_f, batchsqueeze=True),
             modules.polynomial.RegActivation(2, cl1_f, n_degree=3),
-            modules.Reshape(D, cl1_f),
+            modules.Reshape(D, cl1_f, batchsqueeze=True),
             #relu,
             self.create_pool(),
 
             self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]),
-            modules.Reshape(cl2_f),
+            modules.Reshape(cl2_f, batchsqueeze=True),
             modules.polynomial.RegActivation(2, cl2_f, n_degree=3),
-            modules.Reshape(D//4, cl2_f),
+            modules.Reshape(D//4, cl2_f, batchsqueeze=True),
             #relu,
             self.create_pool(),
         )
