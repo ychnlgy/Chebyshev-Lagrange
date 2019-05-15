@@ -57,9 +57,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, dim_in, dim_out):
         super().__init__(dim_in//K, dim_out)
         self.register_buffer("L", self.scale_laplacian(laplacian))
-        #values = self.L.coalesce()._values()
+        values = self.L.coalesce()._values()
         
-        self.act = modules.polynomial.RegActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K)
+        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K)
 
     def scale_laplacian(self, laplacian):
         #lmax = speclib.coarsening.lmax_L(laplacian)
@@ -76,15 +76,14 @@ class ChebyshevGraphConv(torch.nn.Linear):
         return L
 
     def forward(self, X):
-        #values = self.L.coalesce()._values().unsqueeze(0)
-        #pL = self.L.clone()
-        #pL._values()[:] = self.act(values)
+        values = self.L.coalesce()._values().unsqueeze(0)
+        pL = self.L.clone()
+        pL._values()[:] = self.act(values)
         
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(self.L, X)
+        out = SparseMM().forward(pL, X)
         out = out.view(C, L, N).permute(2, 0, 1).contiguous()
-        out = self.act(out)
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L)
         return super().forward(out).view(N, C, -1)
