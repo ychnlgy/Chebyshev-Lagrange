@@ -94,7 +94,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         out = SparseMM().forward(self.L, X)
         out = out.view(C, L, N).permute(2, 0, 1).contiguous()
         out = self.act(out)
-        
+        return out
 
 ##        out = []
 ##        for i in range(self.K):
@@ -144,7 +144,7 @@ class LeNet5Graph(torch.nn.Module):
         super().__init__()
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
-        fc1fin = cl2_f*(D//16)
+        fc1fin = 59#cl2_f*(D//16)
 
         relu = torch.nn.ReLU()
 
