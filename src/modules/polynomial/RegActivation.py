@@ -58,7 +58,7 @@ class RegActivation(Activation):
         return X*w + b
 
     def _regress(self, slc, endi):
-        x = self.basis.nodes[slc].unsqueeze(0).unsqueeze(-1) # 1, d
+        x = self.basis.nodes[slc].unsqueeze(0) # 1, d
         y = self.weight[0,:,slc,:,0].transpose(0, -1).contiguous().squeeze(-1) # D, d, D'
         w = self.calc_weight(slc, x, y)
 
