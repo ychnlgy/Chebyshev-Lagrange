@@ -23,7 +23,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         super().__init__(*args, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
-        self.weight.zero_()
+        self.weight.data.zero_()
 
     def scale_laplacian(self, laplacian):
         lmax = speclib.coarsening.lmax_L(laplacian)
