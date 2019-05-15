@@ -300,6 +300,8 @@ def perm_data(x, indices):
     if indices is None:
         return x
 
+    print(indices)
+
     N, M = x.shape
     Mnew = len(indices)
     assert Mnew >= M
