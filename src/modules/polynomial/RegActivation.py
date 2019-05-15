@@ -30,14 +30,23 @@ class RegActivation(Activation):
         
         requires_regress_l = (X < -1).unsqueeze(2) # (N, D, 1, -1)
         requires_regress_r = (X > +1).unsqueeze(2)        
+
+        input("A")
+        torch.cuda.empty_cache()
         
         B = self.basis(X).unsqueeze(3) # (N, D, n, 1, -1)
         L = (self.weight * B).sum(dim=2) # (N, D, D', -1)
+
+        input("B")
+        torch.cuda.empty_cache()
 
         dl = self._do_regress(X, *regress_l)
         L[requires_regress_l.expand_as(L)] = dl[requires_regress_l.expand_as(dl)]
         dr = self._do_regress(X, *regress_r)
         L[requires_regress_r.expand_as(L)] = dr[requires_regress_r.expand_as(dr)]
+
+        input("C")
+        torch.cuda.empty_cache()
         
         return L.sum(dim=1).view(N, self.t, *X_in.shape[2:])
 
