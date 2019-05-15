@@ -24,7 +24,7 @@ def main(datadir, graph, node, download=0, device="cuda"):
     node = int(node)
 
     Model = [spectral_graph.LeNet5, spectral_graph.LeNet5Graph][graph]
-    model = Model(node).to(device)
+    model = torch.nn.DataParallel(Model(node)).to(device)
 
     print("Parameters: %d" % sum(torch.numel(p) for p in model.parameters() if p.requires_grad))
 
