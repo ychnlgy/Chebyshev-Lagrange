@@ -82,7 +82,11 @@ class ChebyshevGraphConv(torch.nn.Linear):
         new = self.act(values).squeeze(0)
         pL[i,j] = new
 
+        print(values)
         print(new)
+
+        print(new.requires_grad)
+        input()
         
         
         N, C, L = X.size()
