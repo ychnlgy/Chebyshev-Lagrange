@@ -4,7 +4,7 @@ from . import chebyshev, LagrangeBasis
 
 class Activation(torch.nn.Module):
 
-    def __init__(self, input_size, n_degree, zeros=False):
+    def __init__(self, input_size, n_degree, zeros=True):
         super().__init__()
         self.d = input_size
         self.n = n_degree + 1

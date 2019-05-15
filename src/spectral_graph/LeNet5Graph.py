@@ -101,7 +101,7 @@ class NodeGraphConv(torch.nn.Linear):
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
 
-class GraphMaxPool(torch.nn.MaxPool1d):
+class GraphMaxPool(torch.nn.AvgPool1d):
 
     def forward(self, X):
         X = X.permute(0, 2, 1).contiguous()
@@ -135,18 +135,21 @@ class LeNet5Graph(torch.nn.Module):
 
         self.cnn = torch.nn.Sequential(
             self.create_conv(cl1_k, cl1_f, cl1_k, L[0]),
-            relu,
+            modules.polynomial.RegActivation(2, cl1_f, n_degree=3),
+            #relu,
             self.create_pool(),
 
             self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]),
-            relu,
+            modules.polynomial.RegActivation(2, cl1_f, n_degree=3),
+            #relu,
             self.create_pool(),
         )
 
         self.net = torch.nn.Sequential(
             LeNet5.create_fc(fc1fin, fc1),
-            relu,
-            torch.nn.Dropout(0.2),
+            #relu,
+            modules.polynomial.RegActivation(2, cl1_f, n_degree=3),
+            torch.nn.Dropout(0.5),
             LeNet5.create_fc(fc1, fc2)
         )
 
