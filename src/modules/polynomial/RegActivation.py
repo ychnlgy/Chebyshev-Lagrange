@@ -67,5 +67,7 @@ class RegActivation(Activation):
         # so we connect the linear regression to
         # the last point at which the polynomial stops.
         b = y[:,endi].unsqueeze(-1)-w*x[:,endi].unsqueeze(-1)
+        print(w.size(), b.size())
+        input()
         assert b.size() == w.size()
         return w, b
