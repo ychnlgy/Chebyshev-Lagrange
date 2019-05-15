@@ -110,6 +110,12 @@ class ReLUGraphConv(torch.nn.Linear):
         N, C, L = X.size()
         return torch.nn.functional.relu(super().forward(X.view(N*C, L))).view(N, C, -1)
 
+import matplotlib
+matplotlib.use("agg")
+from matplotlib import pyplot
+
+import os
+
 class ExptGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
@@ -118,17 +124,29 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
+        self.act1 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
+        self.act2 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
+        self.act3 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
+        self.act4 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
 
     def scale_laplacian(self, L):
         #lmax = speclib.coarsening.lmax_L(L)
         #L = speclib.coarsening.rescale_L(L, lmax)
-
+        
         L = L.tocoo()
         
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
+
+        pyplot.hist(L.data)
+
+        i = 0
+        fname = lambda j: "laplacians-%d.png" % j
+        while os.path.isfile(fname(i)):
+            i += 1
+        pyplot.savefig(fname(i))
+        pyplot.clf()
 
         L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
         return L.coalesce()
