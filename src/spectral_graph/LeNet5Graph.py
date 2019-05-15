@@ -83,12 +83,10 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
         out = torch.mm(self.L, X0)
         out = out.transpose(0, 1).contiguous()
-        out = self.act.basis(out)
-        out = out.view(L*N, C*self.K)
-        print(out.shape)
-        input()
+        out = self.act.basis(out).view(L, N, C, self.K)
+        out = out.permute(1, 2, 0, 3).contiguous().view(N*C, L*self.K)
         out = super().forward(out).view(L, N, -1)
-        out = out.permute(1, 2, 0).contiguous()
+        out = out.view(N, C, -1)
         return out#super().forward(out).view(N, C, -1)
 
     def iter_chebyshev_X(self, X0, X1):
