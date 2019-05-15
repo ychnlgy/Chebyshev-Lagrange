@@ -54,6 +54,7 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)-1
+        X = X.unsqueeze(2)
         D = X.size(1)
         w = w.view(1, D, -1, *([1]*e))
         b = b.view(1, D, -1, *([1]*e))
