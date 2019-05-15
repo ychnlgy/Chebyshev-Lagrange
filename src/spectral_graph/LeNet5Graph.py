@@ -104,7 +104,7 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.LinkActivation(4, d_in//K, n_degree=K-1, d_out=d_out)
+        self.act = modules.polynomial.RegActivation(8, d_in//K, n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
