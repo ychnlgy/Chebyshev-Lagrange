@@ -57,7 +57,7 @@ def coarsen(A, levels):
         Mnew, Mnew = A.shape
         print('Layer {0}: M_{0} = |V| = {1} nodes ({2} added), |E| = {3} edges'.format(i, Mnew, Mnew-M, A.nnz//2))
 
-        L = laplacian(A, normalized=True)
+        L = laplacian(A, normalized=False)
         laplacians.append(L)
         
     return laplacians, perms[0] if len(perms) > 0 else None
