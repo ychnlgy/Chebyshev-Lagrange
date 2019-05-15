@@ -96,6 +96,15 @@ class NodeGraphConv(torch.nn.Linear):
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
 
+class ReLUGraphConv(torch.nn.Linear):
+
+    def __init__(self, laplacian, K, d_in, d_out, **kwargs):
+        super().__init__(d_in//K, d_out, bias=False, **kwargs)
+
+    def forward(self, X):
+        N, C, L = X.size()
+        return torch.nn.functional.relu(super().forward(X.view(N*C, L))).view(N, C, -1)
+
 class ExptGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
@@ -164,7 +173,7 @@ class LeNet5Graph(torch.nn.Module):
         coarsening_levels = 4
     ):
         super().__init__()
-        self.Conv = [PolyGraphConv, NodeGraphConv, ExptGraphConv][node]
+        self.Conv = [PolyGraphConv, NodeGraphConv, ReLUGraphConv, ExptGraphConv][node]
         
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
