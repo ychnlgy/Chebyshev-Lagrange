@@ -25,7 +25,7 @@ class PolyGraphConv(torch.nn.Linear):
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
         self.K = K
-        self.poly = modules.polynomial.LinkActivation(2, d_in, n_degree=3, zeros=False)
+        #self.poly = modules.polynomial.LinkActivation(2, d_in, n_degree=3, zeros=False)
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, L):
@@ -51,7 +51,7 @@ class PolyGraphConv(torch.nn.Linear):
         out = torch.stack([X0, X1] + Xs, dim=0)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         out = out.view(N*C, L*self.K)
-        out = self.poly(out)
+        #out = self.poly(out)
         return super().forward(out).view(N, C, -1)
 
     def iter_chebyshev_X(self, X0, X1):
