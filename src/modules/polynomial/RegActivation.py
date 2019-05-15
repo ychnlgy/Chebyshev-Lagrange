@@ -20,6 +20,7 @@ class RegActivation(Activation):
             X' - torch Tensor of shape (N, D', *), outputs.
 
         '''
+        print(X_in.size())
         N = X_in.size(0)
         D = X_in.size(1)
         
