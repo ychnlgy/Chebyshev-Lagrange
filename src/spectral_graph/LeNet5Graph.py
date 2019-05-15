@@ -89,13 +89,14 @@ class ChebyshevGraphConv(torch.nn.Linear):
         pL_i[0] += pL_k.to(device) * self.L.size(0)
         
         pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
-        print(pL_i.size(), pL_v.size())
-        input()
         pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # K*C, L*N
+        print(out.size(), K, C, L, N)
         out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
+        print(out.size())
+        input()
         return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
