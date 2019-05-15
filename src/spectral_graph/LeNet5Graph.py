@@ -82,8 +82,8 @@ class ChebyshevGraphConv(torch.nn.Linear):
         new = self.act(values).squeeze(0)
         pL[i,j] = new
 
-        print(new)
-        input()
+        #print(new)
+        #input()
 
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
@@ -106,9 +106,9 @@ class LeNet5Graph(torch.nn.Module):
         self,
         D = 944, 
         cl1_f = 32,
-        cl1_k = 25,
+        cl1_k = 3,
         cl2_f = 64,
-        cl2_k = 25,
+        cl2_k = 3,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
