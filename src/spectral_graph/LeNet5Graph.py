@@ -40,7 +40,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def forward(self, X):
         N, C, L = X.size()
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        X1 = torch.mm(self.L, X0)#X1 = SparseMM().forward(self.L, X0)
+        X1 = SparseMM().forward(self.L, X0)
         Xs = list(self.iter_chebyshev_X(X0, X1))
         out = torch.stack([X0, X1] + Xs, dim=0)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
@@ -49,7 +49,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def iter_chebyshev_X(self, X0, X1):
         for k in range(2, self.K):
-            X2 = 2 * torch.mm(self.L, X1) - X0#SparseMM().forward(self.L, X1) - X0
+            X2 = 2 * SparseMM().forward(self.L, X1) - X0 # 
             yield X2
             X0, X1 = X1, X2
 
@@ -163,7 +163,7 @@ class LeNet5Graph(torch.nn.Module):
         self.net = torch.nn.Sequential(
             LeNet5.create_fc(fc1fin, fc1),
             relu,
-            torch.nn.Dropout(0.1),
+            torch.nn.Dropout(0.5),
             LeNet5.create_fc(fc1, fc2)
         )
 
