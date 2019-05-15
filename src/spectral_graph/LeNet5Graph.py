@@ -129,7 +129,7 @@ class ExptGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
-        return torch.nn.functional.relu(self.forward(X.view(N*C, L))).view(N, C, -1)
+        return torch.nn.functional.relu(super().forward(X.view(N*C, L))).view(N, C, -1)
 
         X = self.act(X.view(N*C, L)).view(N, C, -1)
         return X
