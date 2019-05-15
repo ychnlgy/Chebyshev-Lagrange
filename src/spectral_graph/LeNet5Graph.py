@@ -90,6 +90,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         #input()
 
         N, C, L = X.size()
+        X = X.permute(1, 2, 0).contiguous().view(C, L*N)
 
         out = []
         for i in range(self.K):
