@@ -51,13 +51,15 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)
+        print(w.shape)
+        input()
         w = w.view(1, -1, *([1]*e))
         b = b.view(1, -1, *([1]*e))
         return X*w + b
 
     def _regress(self, slc, endi):
         x = self.basis.nodes[slc].unsqueeze(0) # 1, d
-        y = self.weight[0,:,slc,0] # D, d
+        y = self.weight[0,:,slc] # D, d, D'
         w = self.calc_weight(slc, x, y)
 
         # we want the discontinuous function to
