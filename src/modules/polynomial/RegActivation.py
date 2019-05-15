@@ -20,8 +20,8 @@ class RegActivation(Activation):
             X' - torch Tensor of shape (N, D', *), outputs.
 
         '''
-        N = X.size(0)
-        D = X.size(1)
+        N = X_in.size(0)
+        D = X_in.size(1)
         
         X = X_in.view(N, D, -1)
         
@@ -29,9 +29,7 @@ class RegActivation(Activation):
         regress_r = self._regress(self.rightslice, 0) # right or >1
         
         requires_regress_l = (X < -1).unsqueeze(2) # (N, D, 1, -1)
-        requires_regress_r = (X > +1).unsqueeze(2)
-        
-        
+        requires_regress_r = (X > +1).unsqueeze(2)        
         
         B = self.basis(X).unsqueeze(3) # (N, D, n, 1, -1)
         L = (self.weight * B).sum(dim=2) # (N, D, D', -1)
