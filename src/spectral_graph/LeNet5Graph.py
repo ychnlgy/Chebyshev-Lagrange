@@ -161,7 +161,7 @@ class LeNet5Graph(torch.nn.Module):
         self.net = torch.nn.Sequential(
             LeNet5.create_fc(fc1fin, fc1),
             relu,
-            torch.nn.Dropout(0.5),
+            torch.nn.Dropout(0.1),
             LeNet5.create_fc(fc1, fc2)
         )
 
