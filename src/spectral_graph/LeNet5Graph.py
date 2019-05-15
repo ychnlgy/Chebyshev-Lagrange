@@ -55,47 +55,50 @@ class ChebyshevGraphConv(torch.nn.Linear):
             yield X2
             X0, X1 = X1, X2
 
-##class ChebyshevGraphConv(torch.nn.Linear):
-##
-##    def __init__(self, laplacian, K, dim_in, dim_out):
-##        super().__init__(dim_in//K, dim_out)
-##        self.register_buffer("L", self.scale_laplacian(laplacian))
-##        values = self.L._values()
-##        
-##        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K, zeros=False)
-##
-##    def scale_laplacian(self, laplacian):
-##        #lmax = speclib.coarsening.lmax_L(laplacian)
-##        #L = speclib.coarsening.rescale_L(laplacian, lmax)
-##
-##        L = laplacian # we do not scale it!
-##
-##        L = L.tocoo()
-##        indices = numpy.column_stack((L.row, L.col)).T
-##        indices = torch.from_numpy(indices).long()
-##        L_data = torch.from_numpy(L.data).float()
-##
-##        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
-##        return L.coalesce()
-##
-##    def forward(self, X):
-##        values = self.L._values().unsqueeze(0)
-##        i, j = self.L._indices()
-##        pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
-##        new = self.act(values).squeeze(0)
-##        pL[i,j] = new
-##
-##        #print(new)
-##        #input()
-##
-##        N, C, L = X.size()
-##        X = X.permute(1, 2, 0).contiguous().view(C, L*N)
-##        out = torch.mm(pL, X)#SparseMM().forward(self.L, X)
-##        out = out.view(C, L, N).permute(2, 0, 1).contiguous()
-##
-##        #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
-##        #out = out.view(N*C, L)
-##        return super().forward(out).view(N, C, -1)
+class ChebyshevGraphConv(torch.nn.Linear):
+
+    def __init__(self, laplacian, K, dim_in, dim_out):
+        super().__init__(dim_in//K, dim_out)
+        self.register_buffer("L", self.scale_laplacian(laplacian))
+        values = self.L._values()
+        
+        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K, zeros=False)
+
+    def scale_laplacian(self, laplacian):
+        #lmax = speclib.coarsening.lmax_L(laplacian)
+        #L = speclib.coarsening.rescale_L(laplacian, lmax)
+
+        L = laplacian # we do not scale it!
+
+        L = L.tocoo()
+        indices = numpy.column_stack((L.row, L.col)).T
+        indices = torch.from_numpy(indices).long()
+        L_data = torch.from_numpy(L.data).float()
+
+        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
+        return L.coalesce()
+
+    def forward(self, X):
+        values = self.L._values().unsqueeze(0)
+        i, j = self.L._indices()
+        pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
+        new = self.act(values).squeeze(0)
+        pL[i,j] = new
+
+        #print(new)
+        #input()
+
+        N, C, L = X.size()
+        X = X.permute(1, 2, 0).contiguous().view(C, L*N)
+        out = torch.mm(pL, X)#SparseMM().forward(self.L, X)
+        out = out.view(C, L, N).permute(2, 0, 1).contiguous()
+
+        print(out)
+        input()
+
+        #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
+        #out = out.view(N*C, L)
+        return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
