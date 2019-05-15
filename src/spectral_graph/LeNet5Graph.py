@@ -82,18 +82,20 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def forward(self, X):
         #values = self.L._values().unsqueeze(0)
         #i, j = self.L._indices()
+        pL = self.act(self.L.to_dense())
         
         #new = self.act.basis(values).squeeze(0)
         #pL[i,j] = new
 
         #print(new)
         #input()
+        
 
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(self.L, X)
+        out = torch.mm(pL, X)#SparseMM().forward(self.L, X)
         out = out.view(C, L, N).permute(2, 0, 1).contiguous()
-        out = self.act(out)
+        #out = self.act(out)
         return out
 
 ##        out = []
@@ -135,7 +137,7 @@ class LeNet5Graph(torch.nn.Module):
         cl1_k = 25,
         cl2_f = 64,
         cl2_k = 25,
-        fc1 = 128,
+        fc1 = 512,
         fc2 = 10,
         gridsize = 28,
         number_edges = 8,
