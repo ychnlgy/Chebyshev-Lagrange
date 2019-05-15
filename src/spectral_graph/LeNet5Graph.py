@@ -92,7 +92,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L)
-        return out#super().forward(out).view(N, C, -1)
+        return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
