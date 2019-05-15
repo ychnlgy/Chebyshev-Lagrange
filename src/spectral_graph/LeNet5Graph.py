@@ -17,7 +17,7 @@ class SparseMM(torch.autograd.Function):
         dLdX = torch.mm(W.t(), grad)
         return dLdW, dLdX
 
-class ChebyshevGraphConv(torch.nn.Linear):
+class PolyGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, bias=False, **kwargs)
@@ -53,7 +53,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
             yield X2
             X0, X1 = X1, X2
 
-class ChebyshevGraphConv(torch.nn.Linear):
+class NodeGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
         super().__init__(d_in, d_out, bias=False, **kwargs)
@@ -62,7 +62,6 @@ class ChebyshevGraphConv(torch.nn.Linear):
         self.dout = d_out
         values = self.L._values()
         self.act = modules.polynomial.Activation(len(values), n_degree=K-1, d_out=d_in//K).basis
-        #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, laplacian):
         lmax = speclib.coarsening.lmax_L(laplacian)
@@ -107,6 +106,7 @@ class LeNet5Graph(torch.nn.Module):
 
     def __init__(
         self,
+        node,
         D = 944, 
         cl1_f = 32,
         cl1_k = 25,
@@ -119,6 +119,8 @@ class LeNet5Graph(torch.nn.Module):
         coarsening_levels = 4
     ):
         super().__init__()
+        self.Conv = [PolyGraphConv, NodeGraphConv][node]
+        
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
         fc1fin = cl2_f*(D//16)
@@ -161,7 +163,7 @@ class LeNet5Graph(torch.nn.Module):
         return speclib.coarsening.coarsen(A, coarsening_levels)
 
     def create_conv(self, f1, f2, k, laplacian):
-        conv = ChebyshevGraphConv(laplacian, k, f1, f2)
+        conv = self.Conv(laplacian, k, f1, f2)
         return LeNet5.init_module(conv, f1, f2)
 
     def create_pool(self):

@@ -2,13 +2,15 @@ import tqdm, torch, sys
 
 from .. import spectral_graph, datasets, util
 
-def main(datadir, graph, download=0, device="cuda"):
+def main(datadir, graph, node, download=0, device="cuda"):
 
     '''
 
     Input:
         datadir - str path to where the MNIST dataset should be stored.
         graph - int or str, represents bool of whether to graph version or not.
+        node - int or str, if 0 then use Chebyshev polynomials. Otherwise use
+            Lagrangian polynomial interpolation of Chebyshev nodes.
         download - int or str, represents bool of whether the dataset
             should be downloaded if it is not already downloaded.
             Default: 0.
@@ -18,20 +20,21 @@ def main(datadir, graph, download=0, device="cuda"):
 
     download = int(download)
     graph = int(graph)
+    node = int(node)
 
     Model = [spectral_graph.LeNet5, spectral_graph.LeNet5Graph][graph]
-    model = Model().to(device)
+    model = Model(node).to(device)
 
     batchsize = 100
     augment = True
 
     trainloader, testloader, _, _, _ = datasets.mnist.get(datadir, augment, batchsize, download)
 
-    epochs = 20
+    epochs = 100
 
     lossf = torch.nn.CrossEntropyLoss()
     optim = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=1e-4)
-    sched = torch.optim.lr_scheduler.ExponentialLR(optim, gamma=0.95)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=epochs)
 
     trainloss_avg = util.MovingAverage(momentum=0.99)
 
