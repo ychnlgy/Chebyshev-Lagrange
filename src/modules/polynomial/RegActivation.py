@@ -33,7 +33,7 @@ class RegActivation(Activation):
         L = (self.weight * B).sum(dim=2).sum(dim=1)
 
         dl = self._do_regress(X, *regress_l)
-        print(L.shape, dl[requires_regress_l].shape)
+        print(L.shape, dl.shape)
         input()
         L[requires_regress_l] = dl[requires_regress_l]
         L[requires_regress_r] = self._do_regress(X, *regress_r)[requires_regress_r]
