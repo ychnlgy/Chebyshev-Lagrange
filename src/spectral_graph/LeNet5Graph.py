@@ -62,7 +62,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
         self.K = K
         
-        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K, zeros=False)
+        self.act = modules.polynomial.RegActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K, zeros=False)
         #self.act.weight.data.fill_(1)
         
     def scale_laplacian(self, laplacian):
@@ -132,9 +132,9 @@ class LeNet5Graph(torch.nn.Module):
         self,
         D = 944, 
         cl1_f = 32,
-        cl1_k = 25,
+        cl1_k = 7,
         cl2_f = 64,
-        cl2_k = 25,
+        cl2_k = 7,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
