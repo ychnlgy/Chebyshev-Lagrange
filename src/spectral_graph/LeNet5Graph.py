@@ -110,13 +110,12 @@ class ReLUGraphConv(torch.nn.Linear):
 class ExptGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
-        super().__init__(d_in, d_out, bias=False, **kwargs)
+        super().__init__(d_in//K, d_out, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
         self.K = K
         self.dout = d_out
         self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
-        self.shortcut = torch.nn.Conv1d(d_in//K, d_out, 1)
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
@@ -138,7 +137,7 @@ class ExptGraphConv(torch.nn.Linear):
         out = SparseMM().forward(self.L, X0) # C, L*N
 
         out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
-        return self.shortcut(X) + self.act(out).view(N, C, -1)
+        return (super().forward(out) + self.act(out)).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
