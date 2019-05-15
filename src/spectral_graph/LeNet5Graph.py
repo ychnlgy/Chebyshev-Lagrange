@@ -61,7 +61,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.Activation(len(values), n_degree=K, d_out=d_in//K).basis
+        self.act = modules.polynomial.Activation(len(values), n_degree=K-1, d_out=d_in//K).basis
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, laplacian):
