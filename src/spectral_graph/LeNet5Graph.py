@@ -99,7 +99,7 @@ class NodeGraphConv(torch.nn.Linear):
 class ExptGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
-        super().__init__(d_in, d_out, bias=False, **kwargs)
+        super().__init__(d_in//K, d_out, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
         self.dout = d_out
@@ -129,6 +129,7 @@ class ExptGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
+        return torch.nn.functional.relu(self.forward(X.view(N*C, L))).view(N, C, -1)
 
         X = self.act(X.view(N*C, L)).view(N, C, -1)
         return X
