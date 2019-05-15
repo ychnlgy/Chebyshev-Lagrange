@@ -134,12 +134,13 @@ class ExptGraphConv(torch.nn.Linear):
     def forward(self, X):
         N, C, L = X.size()
 
-        pL = self.L.clone()
-        pL._values()[:] = self.act(self.L._values().unsqueeze(0)).view(-1)
+        #pL = self.L.clone()
+        #pL._values()[:] = self.act(self.L._values().unsqueeze(0)).view(-1)
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(pL, X0) # C, L*N
+        out = SparseMM().forward(self.L, X0) # C, L*N
         out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
+        out = self.act(out)
         return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
