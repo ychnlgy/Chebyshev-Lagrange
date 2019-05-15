@@ -33,7 +33,7 @@ def main(datadir, graph, node, download=0, device="cuda"):
 
     trainloader, testloader, _, _, _ = datasets.mnist.get(datadir, augment, batchsize, download)
 
-    epochs = 100
+    epochs = 20
 
     lossf = torch.nn.CrossEntropyLoss()
     optim = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=1e-6)
