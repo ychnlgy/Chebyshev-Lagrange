@@ -23,6 +23,7 @@ class PolyGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
+        self.L.requires_grad = False
         self.K = K
         #self.weight.data.zero_() this will make it not work
 
@@ -115,7 +116,7 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.LinkActivation(2, len(values), n_degree=K-1, d_out=d_in//K).basis
+        self.act = modules.polynomial.RegActivation(K//2, len(values), n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
@@ -132,23 +133,12 @@ class ExptGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
-        
-        device = self.L.device
-        L_i = self.L._indices()
-        L_v = self.L._values()
-        
-        pL_i = L_i.repeat(1, self.K)
-        pL_k = torch.arange(self.K).view(-1, 1).repeat(1, L_i.size(1)).view(-1).long()
-        assert pL_i.size(1) == pL_k.size(0)
-        pL_i[0] += pL_k.to(device) * self.L.size(0)
-        
-        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
-        pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
-        
+
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(pL, X0) # K*C, L*N
-        out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
-        return super().forward(out).view(N, C, -1)
+        out = SparseMM().forward(self.L, X0) # C, L*N
+
+        out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
+        return self.act(out)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
