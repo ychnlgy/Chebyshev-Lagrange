@@ -55,15 +55,16 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
 class ChebyshevGraphConv(torch.nn.Linear):
 
-    def __init__(self, laplacian, K, f1, f2, **kwargs):
-        super().__init__(f1//K, f2, bias=False, **kwargs)
-        self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
+    def __init__(self, laplacian, K, d_in, d_out, **kwargs):
+        super().__init__(d_in, d_out, bias=False, **kwargs)
+        self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
-        self.act = modules.polynomial.Activation(self.L.size(0), K-1, zeros=False)
+        self.dout = d_out
+        values = self.L._values()
+        self.act = modules.polynomial.Activation(len(values), n_degree=K, d_out=d_in//K).basis
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, laplacian):
-        print(laplacian.min(), laplacian.max())
         lmax = speclib.coarsening.lmax_L(laplacian)
         L = speclib.coarsening.rescale_L(laplacian, lmax)
 
@@ -73,26 +74,25 @@ class ChebyshevGraphConv(torch.nn.Linear):
         L_data = torch.from_numpy(L.data).float()
 
         L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
-        return L
+        return L.coalesce()
 
     def forward(self, X):
+        device = self.L.device
+        L_i = self.L._indices()
+        pL_i = L_i.repeat(1, self.dout)
+        pL_k = torch.arange(self.dout).view(-1, 1).repeat(1, L_i.size(1)).view(-1)
+        assert pL_i.size(1) == pL_k.size(1)
+        pL_i[0] += pL_k.to(device) * self.L.size(0)
+        L_v = self.L._values()
+        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
+        pL = torch.sparse.FloatTensor(pL_i, pL_v, requires_grad=True).to(device)
+        
         N, C, L = X.size()
-        #print(N, C, L)
-        #input()
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        X1 = torch.mm(self.L, X0)#X1 = SparseMM().forward(self.L, X0)
-        X1 = X1.view(C, L, N).permute(2, 0, 1).contiguous().view(N, C, L)
-        #Xs = list(self.iter_chebyshev_X(X0, X1))
-        out = self.act(X1).view(N, C, L)#torch.stack([X0, X1] + Xs, dim=0)
-        #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
-        #out = out.view(N*C, L*self.K)
+        out = SparseMM().forward(pL, X0) # K*C, L*N
+        out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
 
-    def iter_chebyshev_X(self, X0, X1):
-        for k in range(2, self.K):
-            X2 = 2 * torch.mm(self.L, X1) - X0#SparseMM().forward(self.L, X1) - X0
-            yield X2
-            X0, X1 = X1, X2
 class GraphMaxPool(torch.nn.MaxPool1d):
 
     def forward(self, X):
@@ -106,9 +106,9 @@ class LeNet5Graph(torch.nn.Module):
         self,
         D = 944, 
         cl1_f = 32,
-        cl1_k = 13,
+        cl1_k = 25,
         cl2_f = 64,
-        cl2_k = 13,
+        cl2_k = 25,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
