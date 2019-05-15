@@ -68,7 +68,10 @@ class NodeGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.LinkActivation(2, len(values), n_degree=K-1, d_out=d_in//K).basis
+        self.act = modules.polynomial.LagrangeBasis.create(
+            modules.polynomial.chebyshev.get_nodes(K, values.min(), values.max())
+        )
+        print(values.min(), values.max())
 
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
