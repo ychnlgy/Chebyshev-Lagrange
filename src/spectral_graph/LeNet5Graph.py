@@ -62,7 +62,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
         self.K = K
         
-        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K, zeros=False)
+        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K, zeros=False)
         #self.act.weight.data.fill_(1)
         
     def scale_laplacian(self, laplacian):
@@ -80,12 +80,10 @@ class ChebyshevGraphConv(torch.nn.Linear):
         return L.coalesce()
 
     def forward(self, X):
-        X = SparseMM().forward(self.L, X)
-        return super().forward(torch.nn.functional.relu(X)).view(N, C, -1)
-##        values = self.L._values().unsqueeze(0)
-##        i, j = self.L._indices()
-##        
-##        new = self.act.basis(values).squeeze(0)
+        #values = self.L._values().unsqueeze(0)
+        #i, j = self.L._indices()
+        
+        #new = self.act.basis(values).squeeze(0)
         #pL[i,j] = new
 
         #print(new)
@@ -93,17 +91,21 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
+        out = SparseMM().forward(self.L, X)
+        out = out.view(C, L, N).permute(2, 0, 1).contiguous()
+        out = self.act(out)
+        
 
-        out = []
-        for i in range(self.K):
-            basis = new[:,i]
-            pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
-            pL[i,j] = basis
-            out.append(torch.mm(pL, X))
-
-        out = torch.stack(out, dim=0)
-        out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
-        out = out.view(N*C, L*self.K)
+##        out = []
+##        for i in range(self.K):
+##            basis = new[:,i]
+##            pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
+##            pL[i,j] = basis
+##            out.append(torch.mm(pL, X))
+##
+##        out = torch.stack(out, dim=0)
+##        out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
+##        out = out.view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
         
 ##        X = X.permute(1, 2, 0).contiguous().view(C, L*N)
@@ -130,9 +132,9 @@ class LeNet5Graph(torch.nn.Module):
         self,
         D = 944, 
         cl1_f = 32,
-        cl1_k = 3,
+        cl1_k = 25,
         cl2_f = 64,
-        cl2_k = 3,
+        cl2_k = 25,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
