@@ -135,7 +135,7 @@ class ExptGraphConv(torch.nn.Linear):
         N, C, L = X.size()
 
         pL = self.L.clone()
-        pL._values()[:] = self.act(self.cut(self.L._values().unsqueeze(0))).view(-1)
+        pL._values()[:] = self.act(self.L._values().unsqueeze(0)).view(-1)
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # C, L*N
