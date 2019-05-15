@@ -25,9 +25,9 @@ class PolyGraphConv(torch.nn.Linear):
         self.K = K
         #self.weight.data.zero_() this will make it not work
 
-    def scale_laplacian(self, laplacian):
-        lmax = speclib.coarsening.lmax_L(laplacian)
-        L = speclib.coarsening.rescale_L(laplacian, lmax)
+    def scale_laplacian(self, L):
+        lmax = speclib.coarsening.lmax_L(L)
+        L = speclib.coarsening.rescale_L(L, lmax)
 
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
@@ -63,11 +63,11 @@ class NodeGraphConv(torch.nn.Linear):
         values = self.L._values()
         self.act = modules.polynomial.Activation(len(values), n_degree=K-1, d_out=d_in//K).basis
 
-    def scale_laplacian(self, laplacian):
-        lmax = speclib.coarsening.lmax_L(laplacian)
-        L = speclib.coarsening.rescale_L(laplacian, lmax)
+    def scale_laplacian(self, L):
+        #lmax = speclib.coarsening.lmax_L(L)
+        #L = speclib.coarsening.rescale_L(L, lmax)
 
-        L = L.tocoo()
+        L = L.tocoo() # we do no
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
