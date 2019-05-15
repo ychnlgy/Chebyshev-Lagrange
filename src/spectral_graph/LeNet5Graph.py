@@ -20,11 +20,12 @@ class SparseMM(torch.autograd.Function):
 
 class PolyGraphConv(torch.nn.Linear):
 
-    def __init__(self, laplacian, K, *args, **kwargs):
-        super().__init__(*args, bias=False, **kwargs)
+    def __init__(self, laplacian, K, d_in, d_out, **kwargs):
+        super().__init__(d_in, d_out, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
         self.K = K
+        self.poly = modules.polynomial.LinkActivation(2, d_in, n_degree=3, zeros=False)
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, L):
@@ -50,6 +51,7 @@ class PolyGraphConv(torch.nn.Linear):
         out = torch.stack([X0, X1] + Xs, dim=0)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         out = out.view(N*C, L*self.K)
+        out = self.poly(out)
         return super().forward(out).view(N, C, -1)
 
     def iter_chebyshev_X(self, X0, X1):
@@ -124,10 +126,8 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act1 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
-        self.act2 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
-        self.act3 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
-        self.act4 = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out//4)
+        self.cut = 
+        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
         #lmax = speclib.coarsening.lmax_L(L)
