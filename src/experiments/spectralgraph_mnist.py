@@ -7,10 +7,11 @@ def main(datadir, graph, node, download=0, device="cuda"):
     '''
 
     Input:
-        datadir - str path to where the MNIST dataset should be stored.
+        datadir - str path to where the dataset files should be stored.
         graph - int or str, represents bool of whether to graph version or not.
-        node - int or str, if 0 then use Chebyshev polynomials. Otherwise use
-            Lagrangian polynomial interpolation of Chebyshev nodes.
+        node - int or str, if 0 then use Chebyshev polynomials. If 1 use
+            Lagrangian polynomial interpolation of Chebyshev nodes. If -1 use the
+            experimental version.
         download - int or str, represents bool of whether the dataset
             should be downloaded if it is not already downloaded.
             Default: 0.
