@@ -63,6 +63,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, laplacian):
+        print(laplacian.min(), laplacian.max())
         lmax = speclib.coarsening.lmax_L(laplacian)
         L = speclib.coarsening.rescale_L(laplacian, lmax)
 
