@@ -56,7 +56,7 @@ class SparseMM(torch.autograd.Function):
 class ChebyshevGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, dim_in, dim_out):
-        super().__init__(dim_in, dim_out)
+        super().__init__(dim_in//K, dim_out)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         values = self.L._values()
 
@@ -80,10 +80,12 @@ class ChebyshevGraphConv(torch.nn.Linear):
         return L.coalesce()
 
     def forward(self, X):
-        values = self.L._values().unsqueeze(0)
-        i, j = self.L._indices()
-        
-        new = self.act.basis(values).squeeze(0)
+        X = SparseMM().forward(self.L, X)
+        return super().forward(torch.nn.functional.relu(X)).view(N, C, -1)
+##        values = self.L._values().unsqueeze(0)
+##        i, j = self.L._indices()
+##        
+##        new = self.act.basis(values).squeeze(0)
         #pL[i,j] = new
 
         #print(new)
