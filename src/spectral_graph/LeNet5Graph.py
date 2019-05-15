@@ -63,7 +63,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         self.K = K
         
         self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K, zeros=False)
-        self.act.weight.data.fill_(0)
+        self.act.weight.data.fill_(1)
         
     def scale_laplacian(self, laplacian):
         #lmax = speclib.coarsening.lmax_L(laplacian)
