@@ -82,6 +82,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
         new = self.act(values).squeeze(0)
         pL[i,j] = new
 
+        print(new)
+        input()
+
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = torch.mm(pL, X)#SparseMM().forward(pL, X)
