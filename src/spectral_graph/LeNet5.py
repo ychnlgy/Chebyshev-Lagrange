@@ -4,7 +4,7 @@ class LeNet5(torch.nn.Module):
 
     def __init__(
         self,
-        node = None
+        node = None,
         nx = 28,
         ny = 28,
         cl1_f = 32,
