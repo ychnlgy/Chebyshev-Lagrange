@@ -29,8 +29,8 @@ class PolyGraphConv(torch.nn.Linear):
 
     def scale_laplacian(self, L):
         #print(L.max(), L.min())
-        #lmax = speclib.coarsening.lmax_L(L)
-        #L = speclib.coarsening.rescale_L(L, lmax)
+        lmax = speclib.coarsening.lmax_L(L)
+        L = speclib.coarsening.rescale_L(L, lmax)
 
         #print(L.max(), L.min())
 
@@ -118,12 +118,11 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.cut = torch.nn.Linear(len(values), len(values))
-        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1)
+        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
-        lmax = speclib.coarsening.lmax_L(L)
-        L = speclib.coarsening.rescale_L(L, lmax)
+        #lmax = speclib.coarsening.lmax_L(L)
+        #L = speclib.coarsening.rescale_L(L, lmax)
 
         L = L.tocoo()
         
@@ -144,7 +143,7 @@ class ExptGraphConv(torch.nn.Linear):
         out = SparseMM().forward(self.L, X0) # C, L*N
         out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
         out = self.act(out)
-        return super().forward(out).view(N, C, -1)
+        return out#super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
