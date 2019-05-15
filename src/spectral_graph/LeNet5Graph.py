@@ -57,7 +57,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
-        values = self.L.coalesce().values()
+        values = self.L.coalesce()._values()
         
         self.act = modules.polynomial.RegActivation(n_regress=K//2, input_size=len(values), n_degree=K)
 
@@ -77,11 +77,11 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
-        values = self.L.coalesce().values().unsqueeze(0)
+        values = self.L.coalesce()._values().unsqueeze(0)
         L = self.L.clone()
-        L.values()[:] = self.act(values)
+        L._values()[:] = self.act(values)
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(self.L, X)
+        out = SparseMM().forward(L, X)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         out = out.view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
