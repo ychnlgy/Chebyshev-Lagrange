@@ -29,8 +29,8 @@ class RegActivation(Activation):
         N = X.size(0)
         D = X.size(1)
         
-        B = self.basis(X.view(N, D, -1)) # (N, D, n, -1)
-        L = (self.weight * B).sum(dim=2).view(X.size())
+        B = self.basis(X.view(N, D, -1)).unsqueeze(3) # (N, D, n, 1, -1)
+        L = (self.weight * B).sum(dim=2).sum(dim=1)
 
         dl = self._do_regress(X, *regress_l)
         L[requires_regress_l] = dl[requires_regress_l]
