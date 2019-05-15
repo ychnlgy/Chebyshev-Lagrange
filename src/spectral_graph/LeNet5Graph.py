@@ -58,6 +58,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 class ChebyshevGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, dim_in, dim_out):
+        print(dim_in//K)
         super().__init__(dim_in//K, dim_out)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         values = self.L._values()
