@@ -81,12 +81,14 @@ class ChebyshevGraphConv(torch.nn.Linear):
         
         device = self.L.device
         L_i = self.L._indices()
+        L_v = self.L._values()
+        
         pL_i = L_i.repeat(1, self.K)
         pL_k = torch.arange(self.K).view(-1, 1).repeat(1, L_i.size(1)).view(-1).long()
         assert pL_i.size(1) == pL_k.size(0)
         pL_i[0] += pL_k.to(device) * self.L.size(0)
-        L_v = self.L._values()
-        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
+        
+        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1).repeat(self.K) # 1, n_laplacian, K
         pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
