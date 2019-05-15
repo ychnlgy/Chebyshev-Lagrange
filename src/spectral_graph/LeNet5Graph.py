@@ -62,17 +62,13 @@ class NodeGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.LinkActivation(2, len(values), n_degree=K-1, d_out=d_in//K).basis
+        self.act = modules.polynomial.RegActivation(4, len(values), n_degree=K-1, d_out=d_in//K)
 
     def scale_laplacian(self, L):
-        #print(L.max(), L.min())
-        #lmax = speclib.coarsening.lmax_L(L)
-        #L = speclib.coarsening.rescale_L(L, lmax)
-        L = L
+        lmax = speclib.coarsening.lmax_L(L)
+        L = speclib.coarsening.rescale_L(L, lmax)
 
-        print(L.max(), L.min())
-
-        L = L.tocoo() # we do no
+        L = L.tocoo()
         
         indices = numpy.column_stack((L.row, L.col)).T
         indices = torch.from_numpy(indices).long()
@@ -97,6 +93,8 @@ class NodeGraphConv(torch.nn.Linear):
         pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
+        print(torch.mm(self.L, X0).abs().max())
+        input()
         out = SparseMM().forward(pL, X0) # K*C, L*N
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
