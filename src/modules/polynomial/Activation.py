@@ -4,7 +4,7 @@ from . import chebyshev, LagrangeBasis
 
 class Activation(torch.nn.Module):
 
-    def __init__(self, input_size, n_degree):
+    def __init__(self, input_size, n_degree, zeros=True):
         super().__init__()
         self.d = input_size
         self.n = n_degree + 1
@@ -15,6 +15,13 @@ class Activation(torch.nn.Module):
         self.weight = torch.nn.Parameter(
             torch.zeros(1, self.d, self.n, 1)
         )
+
+        if not zeros:
+            self.randomize_parameters()
+
+    def randomize_parameters(self):
+        scale = math.sqrt(2.0/(self.d+self.n))
+        self.weight.data.uniform_(-scale, scale)
 
     def forward(self, X):
         '''
