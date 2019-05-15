@@ -28,6 +28,7 @@ class PolyGraphConv(torch.nn.Linear):
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
         L = speclib.coarsening.rescale_L(L, lmax)
+        print(L.max(), L.min())
 
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
