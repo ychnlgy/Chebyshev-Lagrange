@@ -126,7 +126,7 @@ class ExptGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.cut = 
+        self.cut = None
         self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
 
     def scale_laplacian(self, L):
