@@ -28,6 +28,8 @@ def _calc_b(x, y, w, xm, ym):
 def _calc_w(x, y, xm, ym):
     dx = x - xm
     dy = y - ym
+    print(dx.size(), dy.size())
+    input()
     num = (dx*dy).sum(dim=1).unsqueeze(1)
     den = (dx**2).sum(dim=1).unsqueeze(1)
     return num/den
