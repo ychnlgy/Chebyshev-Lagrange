@@ -23,8 +23,8 @@ class RegActivation(Activation):
         regress_l = self._regress(self.leftslice, -1) # left or <-1
         regress_r = self._regress(self.rightslice, 0) # right or >1
         
-        requires_regress_l = X < -1
-        requires_regress_r = X > +1
+        requires_regress_l = (X < -1).unsqueeze(2)
+        requires_regress_r = (X > +1).unsqueeze(2)
         
         N = X.size(0)
         D = X.size(1)
@@ -33,10 +33,9 @@ class RegActivation(Activation):
         L = (self.weight * B).sum(dim=2).sum(dim=1)
 
         dl = self._do_regress(X, *regress_l)
-        print(L.shape, dl.shape)
-        input()
-        L[requires_regress_l] = dl[requires_regress_l]
-        L[requires_regress_r] = self._do_regress(X, *regress_r)[requires_regress_r]
+        L[requires_regress_l] = dl[requires_regress_l.expand_as(dl)]
+        dr = self._do_regress(X, *regress_r)
+        L[requires_regress_r] = dr[requires_regress_r.expand_as(dr)]
         
         return L
 
@@ -51,10 +50,9 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)
-        w = w.view(1, -1, *([1]*e))
-        b = b.view(1, -1, *([1]*e))
-        print(X.size(), w.size(), b.size())
-        input()
+        X = X.unsqueeze(2)
+        w = w.view(1, *w.size(), *([1]*e))
+        b = b.view(1, *b.size(), *([1]*e))
         return X*w + b
 
     def _regress(self, slc, endi):
