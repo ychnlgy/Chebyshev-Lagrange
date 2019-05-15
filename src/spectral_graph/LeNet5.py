@@ -8,9 +8,9 @@ class LeNet5(torch.nn.Module):
         nx = 28,
         ny = 28,
         cl1_f = 32,
-        cl1_k = 25,
+        cl1_k = 13,
         cl2_f = 64,
-        cl2_k = 25,
+        cl2_k = 13,
         fc1 = 512,
         fc2 = 10
     ):
