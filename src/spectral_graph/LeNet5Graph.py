@@ -54,8 +54,8 @@ class SparseMM(torch.autograd.Function):
 
 class ChebyshevGraphConv(torch.nn.Linear):
 
-    def __init__(self, laplacian, K, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, laplacian, K, dim_in, dim_out):
+        super().__init__(dim_in//K, dim_out, bias=False)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         values = self.L.coalesce()._values()
         
@@ -83,10 +83,10 @@ class ChebyshevGraphConv(torch.nn.Linear):
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X)
-        return out.view(C, L, N).permute(2, 0, 1).contiguous()
+        out = out.view(C, L, N).permute(2, 0, 1).contiguous()
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L)
-        #return super().forward(out).view(N, C, -1)
+        return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
@@ -113,7 +113,7 @@ class LeNet5Graph(torch.nn.Module):
         super().__init__()
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
-        fc1fin = 59#cl2_f*(D//16)
+        fc1fin = cl2_f*(D//16)
 
         relu = torch.nn.ReLU()
 
