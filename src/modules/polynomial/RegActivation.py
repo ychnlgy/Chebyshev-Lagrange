@@ -49,8 +49,8 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)
-        w = w.view(1, len(w), *([1]*e))
-        b = b.view(1, len(b), *([1]*e))
+        w = w.view(1, -1, *([1]*e))
+        b = b.view(1, -1, *([1]*e))
         return X*w + b
 
     def _regress(self, slc, endi):
