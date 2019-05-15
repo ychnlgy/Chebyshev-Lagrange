@@ -119,13 +119,24 @@ class ExptGraphConv(torch.nn.Linear):
         L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
         return L.coalesce()
 
+##    def forward(self, X):
+##        N, C, L = X.size()
+##        
+##        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
+##        LX = SparseMM().forward(self.L, X0) # C, L*N
+##        LX = LX.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
+##        return self.act(LX).view(N, C, -1)
+
     def forward(self, X):
         N, C, L = X.size()
+
+        X = self.act(X.view(N*C, L)).view(N, C, -1)
+        Dp = X.size(-1)
         
-        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        LX = SparseMM().forward(self.L, X0) # C, L*N
-        LX = LX.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
-        return self.act(LX).view(N, C, -1)
+        X0 = X.permute(1, 2, 0).contiguous().view(C, Dp*N)
+        LX = SparseMM().forward(self.L, X0) # C, D'*N
+        LX = LX.view(C, Dp, N).permute(2, 0, 1).contiguous().view(N, C, Dp)
+        return LX#self.act(LX).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
