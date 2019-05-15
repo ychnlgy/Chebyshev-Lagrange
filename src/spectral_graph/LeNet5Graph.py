@@ -125,7 +125,7 @@ class LeNet5Graph(torch.nn.Module):
         coarsening_levels = 4
     ):
         super().__init__()
-        self.Conv = [PolyGraphConv, NodeGraphConv, ReLUGraphConv, ExptGraphConv][node]
+        self.Conv = [PolyGraphConv, NodeGraphConv][node]
         
         L, self.perm = self.generate_laplacian(gridsize, number_edges, coarsening_levels)
         
