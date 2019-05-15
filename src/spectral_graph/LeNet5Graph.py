@@ -58,7 +58,6 @@ class ChebyshevGraphConv(torch.nn.Linear):
         super().__init__(dim_in//K, dim_out)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         values = self.L._values()
-        print(len(values))
         
         self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=len(values), n_degree=K, zeros=True)
 
@@ -90,8 +89,6 @@ class ChebyshevGraphConv(torch.nn.Linear):
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = torch.mm(pL, X)#SparseMM().forward(self.L, X)
         out = out.view(C, L, N).permute(2, 0, 1).contiguous()
-        print(out.size())
-        input()
 
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L)
@@ -125,8 +122,6 @@ class LeNet5Graph(torch.nn.Module):
         fc1fin = cl2_f*(D//16)
 
         relu = torch.nn.ReLU()
-
-        print(L[0])
 
         self.cnn = torch.nn.Sequential(
             self.create_conv(cl1_k, cl1_f, cl1_k, L[0]),
