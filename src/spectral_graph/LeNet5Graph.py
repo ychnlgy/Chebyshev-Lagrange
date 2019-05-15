@@ -139,7 +139,7 @@ class ExptGraphConv(torch.nn.Linear):
         indices = torch.from_numpy(indices).long()
         L_data = torch.from_numpy(L.data).float()
 
-        pyplot.hist(L.data)
+        pyplot.hist(L.data, bins=100)
 
         i = 0
         fname = lambda j: "laplacians-%d.png" % j
