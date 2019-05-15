@@ -23,6 +23,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         super().__init__(*args, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
+        self.weight.zero_()
 
     def scale_laplacian(self, laplacian):
         lmax = speclib.coarsening.lmax_L(laplacian)
@@ -160,7 +161,7 @@ class LeNet5Graph(torch.nn.Module):
 
     def create_conv(self, f1, f2, k, laplacian):
         conv = ChebyshevGraphConv(laplacian, k, f1, f2)
-        return LeNet5.init_module(conv, f1, f2)
+        return conv#LeNet5.init_module(conv, f1, f2)
 
     def create_pool(self):
         return GraphMaxPool(4)
