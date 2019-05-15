@@ -137,7 +137,7 @@ class ExptGraphConv(torch.nn.Linear):
         out = SparseMM().forward(self.L, X0) # C, L*N
 
         out = out.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
-        return self.act(out)
+        return self.act(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
