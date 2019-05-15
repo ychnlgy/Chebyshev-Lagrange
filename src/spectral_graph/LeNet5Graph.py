@@ -21,7 +21,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, bias=False, **kwargs)
-        self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
+        self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
         #self.weight.data.zero_() this will make it not work
 
