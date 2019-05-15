@@ -57,6 +57,8 @@ class RegActivation(Activation):
         D = X.size(1)
         w = w.view(1, D, -1, *([1]*e))
         b = b.view(1, D, -1, *([1]*e))
+        print(X.shape, w.shape, b.shape)
+        input()
         return X*w + b
 
     def _regress(self, slc, endi):
