@@ -62,12 +62,13 @@ class NodeGraphConv(torch.nn.Linear):
         self.K = K
         self.dout = d_out
         values = self.L._values()
-        self.act = modules.polynomial.Activation(len(values), n_degree=K-1, d_out=d_in//K).basis
+        self.act = modules.polynomial.LinkActivation(2, len(values), n_degree=K-1, d_out=d_in//K).basis
 
     def scale_laplacian(self, L):
         #print(L.max(), L.min())
-        lmax = speclib.coarsening.lmax_L(L)
-        L = speclib.coarsening.rescale_L(L, lmax)
+        #lmax = speclib.coarsening.lmax_L(L)
+        #L = speclib.coarsening.rescale_L(L, lmax)
+        L = L*2
 
         L = L.tocoo() # we do no
         indices = numpy.column_stack((L.row, L.col)).T
