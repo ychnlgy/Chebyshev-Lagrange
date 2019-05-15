@@ -59,7 +59,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         super().__init__(*args, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
         self.K = K
-        self.act = src.modules.polynomial.Activation(self.L.size(0), n_degree=K)
+        self.act = src.modules.polynomial.Activation(self.L.size(0), n_degree=K-1)
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, laplacian):
@@ -76,15 +76,18 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         N, C, L = X.size()
-        #X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
+        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         #X1 = torch.mm(self.L, X0)#X1 = SparseMM().forward(self.L, X0)
         #Xs = list(self.iter_chebyshev_X(X0, X1))
         #out = torch.stack([X0, X1] + Xs, dim=0)
-        out = self.act.basis(X)
-        out = out.permute(2, 1, 2, 0).contiguous()
-        out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
-        out = out.view(N*C, L*self.K)
-        return super().forward(out).view(N, C, -1)
+
+        out = torch.mm(self.L, X0)
+        out = out.transpose(0, 1).contiguous()
+        out = self.act.basis(out)
+        out = out.view(L*N, C*self.K)
+        out = super().forward(out).view(L, N, -1)
+        out = out.permute(1, 2, 0).contiguous()
+        return out#super().forward(out).view(N, C, -1)
 
     def iter_chebyshev_X(self, X0, X1):
         for k in range(2, self.K):
