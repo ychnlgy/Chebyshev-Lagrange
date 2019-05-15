@@ -60,6 +60,8 @@ class RegActivation(Activation):
     def _regress(self, slc, endi):
         x = self.basis.nodes[slc].unsqueeze(0) # 1, d
         y = self.weight[0,:,slc,:,0] # D, d, D'
+        print(x.size(), y.size())
+        input()
         w = self.calc_weight(slc, x, y)
 
         # we want the discontinuous function to
