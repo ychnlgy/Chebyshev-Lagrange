@@ -77,13 +77,12 @@ class ChebyshevGraphConv(torch.nn.Linear):
 
     def forward(self, X):
         values = self.L.coalesce()._values().unsqueeze(0)
-        L = self.L.clone()
-        L._values()[:] = self.act(values)
+        pL = self.L.clone()
+        pL._values()[:] = self.act(values)
         
         N, C, L = X.size()
-        
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        out = SparseMM().forward(L, X)
+        out = SparseMM().forward(pL, X)
         out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         out = out.view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
