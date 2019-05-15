@@ -80,6 +80,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
         pL = self.L.clone()
         pL._values().requires_grad = True
         pL._values()[:] = self.act(values)
+
+        print(self.act.weight.requires_grad)
+        input()
         
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
