@@ -7,14 +7,15 @@ from .. import modules
 class SparseMM(torch.autograd.Function):
 
     def forward(self, W, X):
-        self.save_for_backward(W, X)
+        tosave = [t if t.requires_grad else None for t in [W, X]]
+        self.save_for_backward(*tosave)
         return torch.mm(W, X)
 
     def backward(self, grad_output):
         W, X = self.saved_tensors
         grad = grad_output.clone()
-        dLdW = torch.mm(grad, X.t())
-        dLdX = torch.mm(W.t(), grad)
+        dLdW = torch.mm(grad, X.t()) if X is not None else None
+        dLdX = torch.mm(W.t(), grad) if W is not None else None
         return dLdW, dLdX
 
 class PolyGraphConv(torch.nn.Linear):
@@ -108,13 +109,46 @@ class ReLUGraphConv(torch.nn.Linear):
 class ExptGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, d_in, d_out, **kwargs):
-        super().__init__(d_in//K, d_out, bias=False, **kwargs)
-        self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
+        super().__init__(d_in, d_out, bias=False, **kwargs)
+        self.register_buffer("L", self.scale_laplacian(laplacian))
+        self.L.requires_grad = False
+        self.K = K
+        self.dout = d_out
+        values = self.L._values()
+        self.act = modules.polynomial.LinkActivation(2, len(values), n_degree=K-1, d_out=d_in//K).basis
+
+    def scale_laplacian(self, L):
+        lmax = speclib.coarsening.lmax_L(L)
+        L = speclib.coarsening.rescale_L(L, lmax)
+
+        L = L.tocoo()
+        
+        indices = numpy.column_stack((L.row, L.col)).T
+        indices = torch.from_numpy(indices).long()
+        L_data = torch.from_numpy(L.data).float()
+
+        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
+        return L.coalesce()
 
     def forward(self, X):
         N, C, L = X.size()
-        X = self.act(X.view(N*C, L)).view(N, C, -1)
-        return X
+        
+        device = self.L.device
+        L_i = self.L._indices()
+        L_v = self.L._values()
+        
+        pL_i = L_i.repeat(1, self.K)
+        pL_k = torch.arange(self.K).view(-1, 1).repeat(1, L_i.size(1)).view(-1).long()
+        assert pL_i.size(1) == pL_k.size(0)
+        pL_i[0] += pL_k.to(device) * self.L.size(0)
+        
+        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
+        pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
+        
+        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
+        out = SparseMM().forward(pL, X0) # K*C, L*N
+        out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
+        return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
