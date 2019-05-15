@@ -57,9 +57,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def __init__(self, laplacian, K, dim_in, dim_out):
         super().__init__(dim_in//K, dim_out)
         self.register_buffer("L", self.scale_laplacian(laplacian))
-        values = self.L.coalesce()._values()
+        #values = self.L.coalesce()._values()
         
-        self.act = modules.polynomial.RegActivation(n_regress=K//2, input_size=len(values), n_degree=K)
+        self.act = modules.polynomial.RegActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K)
 
     def scale_laplacian(self, laplacian):
         #lmax = speclib.coarsening.lmax_L(laplacian)
