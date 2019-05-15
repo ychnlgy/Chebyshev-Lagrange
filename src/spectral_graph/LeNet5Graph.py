@@ -53,43 +53,47 @@ class ChebyshevGraphConv(torch.nn.Linear):
             yield X2
             X0, X1 = X1, X2
 
-class ChebyshevGraphConv(torch.nn.Linear):
-
-    def __init__(self, laplacian, K, *args, **kwargs):
-        super().__init__(*args, bias=False, **kwargs)
-        self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
-        self.K = K
-        #self.weight.data.zero_() this will make it not work
-
-    def scale_laplacian(self, laplacian):
-        lmax = speclib.coarsening.lmax_L(laplacian)
-        L = speclib.coarsening.rescale_L(laplacian, lmax)
-
-        L = L.tocoo()
-        indices = numpy.column_stack((L.row, L.col)).T
-        indices = torch.from_numpy(indices).long()
-        L_data = torch.from_numpy(L.data).float()
-
-        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
-        return L
-
-    def forward(self, X):
-        N, C, L = X.size()
-        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
-        ON = torch.ones_like(X0)
-        X1 = torch.mm(self.L, ON)#X1 = SparseMM().forward(self.L, X0)
-        Xs = list(self.iter_chebyshev_X(ON, X1))
-        out = torch.stack([X0, X1] + Xs, dim=0).view(self.K, C, L*N)
-        out = out * X0.unsqueeze(0)
-        out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
-        out = out.view(N*C, L*self.K)
-        return super().forward(out).view(N, C, -1)
-
-    def iter_chebyshev_X(self, X0, X1):
-        for k in range(2, self.K):
-            X2 = 2 * torch.mm(self.L, X1) - X0#SparseMM().forward(self.L, X1) - X0
-            yield X2
-            X0, X1 = X1, X2
+##class ChebyshevGraphConv(torch.nn.Linear):
+##
+##    def __init__(self, laplacian, K, *args, **kwargs):
+##        super().__init__(*args, bias=False, **kwargs)
+##        self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
+##        self.K = K
+##        self.act = modules.polynomial.Activation(self.L.size(0), n_degree=K-1)
+##        #self.weight.data.zero_() this will make it not work
+##
+##    def scale_laplacian(self, laplacian):
+##        lmax = speclib.coarsening.lmax_L(laplacian)
+##        L = speclib.coarsening.rescale_L(laplacian, lmax)
+##
+##        L = L.tocoo()
+##        indices = numpy.column_stack((L.row, L.col)).T
+##        indices = torch.from_numpy(indices).long()
+##        L_data = torch.from_numpy(L.data).float()
+##
+##        L = torch.sparse.FloatTensor(indices, L_data, torch.Size(L.shape))
+##        return L
+##
+##    def forward(self, X):
+##        N, C, L = X.size()
+##        X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
+##        #X1 = torch.mm(self.L, X0)#X1 = SparseMM().forward(self.L, X0)
+##        #Xs = list(self.iter_chebyshev_X(X0, X1))
+##        #out = torch.stack([X0, X1] + Xs, dim=0)
+##
+##        out = torch.mm(self.L, X0)
+##        out = out.transpose(0, 1).contiguous()
+##        out = self.act.basis(out).view(L, N, C, self.K)
+##        out = out.permute(1, 2, 0, 3).contiguous().view(N*C, L*self.K)
+##        out = super().forward(out).view(L, N, -1)
+##        out = out.view(N, C, -1)
+##        return out#super().forward(out).view(N, C, -1)
+##
+##    def iter_chebyshev_X(self, X0, X1):
+##        for k in range(2, self.K):
+##            X2 = 2 * torch.mm(self.L, X1) - X0#SparseMM().forward(self.L, X1) - X0
+##            yield X2
+##            X0, X1 = X1, X2
 
 class GraphMaxPool(torch.nn.MaxPool1d):
 
