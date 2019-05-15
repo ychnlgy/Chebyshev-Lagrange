@@ -10,34 +10,38 @@ class RegActivation(Activation):
         self.leftslice = slice(-n_regress, None)
         self.rightslice = slice(n_regress)
 
-    def forward(self, X):
+    def forward(self, X_in):
         '''
 
         Input:
             X - torch Tensor of shape (N, D, *), input features.
 
         Output:
-            X' - torch Tensor of shape (N, D, *), outputs.
+            X' - torch Tensor of shape (N, D', *), outputs.
 
         '''
-        regress_l = self._regress(self.leftslice, -1) # left or <-1
-        regress_r = self._regress(self.rightslice, 0) # right or >1
-        
-        requires_regress_l = (X < -1).unsqueeze(2)
-        requires_regress_r = (X > +1).unsqueeze(2)
-        
         N = X.size(0)
         D = X.size(1)
         
-        B = self.basis(X.view(N, D, -1)).unsqueeze(3) # (N, D, n, 1, -1)
-        L = (self.weight * B).sum(dim=2).sum(dim=1)
+        X = X_in.view(N, D, -1)
+        
+        regress_l = self._regress(self.leftslice, -1) # left or <-1
+        regress_r = self._regress(self.rightslice, 0) # right or >1
+        
+        requires_regress_l = (X < -1).unsqueeze(2) # (N, D, 1, -1)
+        requires_regress_r = (X > +1).unsqueeze(2)
+        
+        
+        
+        B = self.basis(X).unsqueeze(3) # (N, D, n, 1, -1)
+        L = (self.weight * B).sum(dim=2) # (N, D, D', -1)
 
         dl = self._do_regress(X, *regress_l)
-        L[requires_regress_l] = dl[requires_regress_l.expand_as(dl)]
+        L[requires_regress_l.expand_as(L)] = dl[requires_regress_l.expand_as(dl)]
         dr = self._do_regress(X, *regress_r)
-        L[requires_regress_r] = dr[requires_regress_r.expand_as(dr)]
+        L[requires_regress_r.expand_as(L)] = dr[requires_regress_r.expand_as(dr)]
         
-        return L
+        return L.view(N, self.t, *X_in.shape[2:])
 
     # === PROTECTED ===
 
