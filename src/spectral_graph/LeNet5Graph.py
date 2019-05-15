@@ -79,7 +79,11 @@ class ChebyshevGraphConv(torch.nn.Linear):
         values = self.L._values().unsqueeze(0)
         i, j = self.L._indices()
         pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
-        pL[i,j] = self.act(values).squeeze(0)
+        new = self.act(values).squeeze(0)
+        pL[i,j] = new
+
+        print(new)
+        
         
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
