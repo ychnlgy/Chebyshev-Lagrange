@@ -89,7 +89,7 @@ class NodeGraphConv(torch.nn.Linear):
         assert pL_i.size(1) == pL_k.size(0)
         pL_i[0] += pL_k.to(device) * self.L.size(0)
         
-        pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
+        pL_v = self.act.basis(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
         pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
