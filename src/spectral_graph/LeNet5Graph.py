@@ -22,12 +22,13 @@ class PolyGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, *args, **kwargs):
         super().__init__(*args, bias=False, **kwargs)
-        self.register_buffer("L", self.scale_laplacian(laplacian).to_dense())
+        self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
         self.K = K
         #self.weight.data.zero_() this will make it not work
 
     def scale_laplacian(self, L):
+        print(L.max(), L.min())
         lmax = speclib.coarsening.lmax_L(L)
         L = speclib.coarsening.rescale_L(L, lmax)
 
