@@ -120,6 +120,7 @@ class ExptGraphConv(torch.nn.Linear):
     def scale_laplacian(self, L):
         lmax = speclib.coarsening.lmax_L(L)
         L = speclib.coarsening.rescale_L(L, lmax)
+        print(L.abs().max())
 
         L = L.tocoo()
         
