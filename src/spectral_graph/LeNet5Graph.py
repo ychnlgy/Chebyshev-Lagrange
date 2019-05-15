@@ -113,7 +113,7 @@ class ExptGraphConv(torch.nn.Linear):
         super().__init__(d_in//K, d_out, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.L.requires_grad = False
-        print(self.L.abs().max())
+        print(self.L.to_dense().abs().max())
         self.K = K
         self.dout = d_out
         self.act = modules.polynomial.RegActivation(K//2, d_in//K, n_degree=K-1, d_out=d_out)
