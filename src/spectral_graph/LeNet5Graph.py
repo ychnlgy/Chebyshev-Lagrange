@@ -87,7 +87,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         pL_i[0] += pL_k.to(device) * self.L.size(0)
         L_v = self.L._values()
         pL_v = self.act(self.L._values().unsqueeze(0)).view(-1) # 1, n_laplacian, K
-        pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C])
+        pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # K*C, L*N
