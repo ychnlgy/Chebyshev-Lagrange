@@ -78,7 +78,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
     def forward(self, X):
         values = self.L._values().unsqueeze(0)
         i, j = self.L._indices()
-        pL = torch.zeros(self.L.size()).to(X.device)
+        pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
         pL[i,j] = self.act(values).squeeze(0)
         
         N, C, L = X.size()
