@@ -79,6 +79,9 @@ class ChebyshevGraphConv(torch.nn.Linear):
         values = self.L.coalesce()._values().unsqueeze(0)
         pL = self.L.clone()
         pL._values()[:] = self.act(values)
+
+        print(pL._values().requires_grad)
+        input()
         
         N, C, L = X.size()
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
