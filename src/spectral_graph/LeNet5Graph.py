@@ -20,7 +20,7 @@ class SparseMM(torch.autograd.Function):
 class ChebyshevGraphConv(torch.nn.Linear):
 
     def __init__(self, laplacian, K, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, bias=False, **kwargs)
         self.register_buffer("L", self.scale_laplacian(laplacian))
         self.K = K
 
