@@ -51,7 +51,7 @@ class RegActivation(Activation):
 
     def _do_regress(self, X, w, b):
         e = len(X.shape) - len(w.shape)
-        print(w.shape)
+        print(w.shape, b.shape)
         input()
         w = w.view(1, -1, *([1]*e))
         b = b.view(1, -1, *([1]*e))
@@ -67,7 +67,4 @@ class RegActivation(Activation):
         # so we connect the linear regression to
         # the last point at which the polynomial stops.
         b = y[:,endi].unsqueeze(-1)-w*x[:,endi].unsqueeze(-1)
-        print(w.size(), b.size())
-        input()
-        assert b.size() == w.size()
         return w, b
