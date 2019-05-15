@@ -55,8 +55,8 @@ class RegActivation(Activation):
         D = X.size(1)
         print(D, X.size(), w.size(), b.size())
         input()
-        w = w.view(1, D, w.size(1), *([1]*e))
-        b = b.view(1, D, b.size(1), *([1]*e))
+        w = w.view(1, D, -1, *([1]*e))
+        b = b.view(1, D, -1, *([1]*e))
         
         return X*w + b
 
