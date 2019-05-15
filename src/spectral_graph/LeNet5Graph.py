@@ -126,7 +126,7 @@ class LeNet5Graph(torch.nn.Module):
 
         relu = torch.nn.ReLU()
 
-        print(L)
+        print(L[0])
 
         self.cnn = torch.nn.Sequential(
             self.create_conv(cl1_k, cl1_f, cl1_k, L[0]),
