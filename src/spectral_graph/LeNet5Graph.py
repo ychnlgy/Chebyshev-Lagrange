@@ -59,13 +59,13 @@ class ChebyshevGraphConv(torch.nn.Linear):
         self.register_buffer("L", self.scale_laplacian(laplacian))
         values = self.L._values()
         
-        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K, zeros=False)
+        self.act = modules.polynomial.LinkActivation(n_regress=K//2, input_size=self.L.size(0), n_degree=K, zeros=True)
 
     def scale_laplacian(self, laplacian):
-        #lmax = speclib.coarsening.lmax_L(laplacian)
-        #L = speclib.coarsening.rescale_L(laplacian, lmax)
+        lmax = speclib.coarsening.lmax_L(laplacian)
+        L = speclib.coarsening.rescale_L(laplacian, lmax)
 
-        L = laplacian # we do not scale it!
+        #L = laplacian # we do not scale it!
 
         L = L.tocoo()
         indices = numpy.column_stack((L.row, L.col)).T
@@ -76,11 +76,11 @@ class ChebyshevGraphConv(torch.nn.Linear):
         return L.coalesce()
 
     def forward(self, X):
-        #values = self.L._values().unsqueeze(0)
-        #i, j = self.L._indices()
-        #pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
-        #new = self.act(values).squeeze(0)
-        #pL[i,j] = new
+        values = self.L._values().unsqueeze(0)
+        i, j = self.L._indices()
+        pL = torch.zeros(self.L.size(), requires_grad=True).to(X.device)
+        new = self.act.basis(values).squeeze(0)
+        pL[i,j] = new
 
         #print(new)
         #input()
@@ -89,7 +89,7 @@ class ChebyshevGraphConv(torch.nn.Linear):
         X = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(self.L, X)
         out = out.view(C, L, N).permute(2, 0, 1).contiguous()
-        out = self.act(out)
+
         #out = out.view(self.K, C, L, N).permute(3, 1, 2, 0).contiguous()
         #out = out.view(N*C, L)
         return super().forward(out).view(N, C, -1)
