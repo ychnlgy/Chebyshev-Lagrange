@@ -109,7 +109,7 @@ class Branches(torch.nn.ModuleList):
     def forward(self, X):
         return sum(mod(X) for mod in self)/len(self)
 
-class GraphMaxPool(torch.nn.MaxPool1d):
+class GraphMaxPool(torch.nn.AvgPool1d):
 
     def forward(self, X):
         X = X.permute(0, 2, 1).contiguous()
@@ -143,13 +143,13 @@ class LeNet5Graph(torch.nn.Module):
 
         self.cnn = torch.nn.Sequential(
             Branches([
-                self.create_conv(cl1_k, cl1_f, cl1_k, L[0]) for i in range(2)
+                self.create_conv(cl1_k, cl1_f, cl1_k, L[0]) for i in range(4)
             ]),
             relu,
             self.create_pool(),
 
             Branches([
-                self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]) for i in range(2)
+                self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]) for i in range(4)
             ]),
             relu,
             self.create_pool(),
@@ -158,7 +158,7 @@ class LeNet5Graph(torch.nn.Module):
         self.net = torch.nn.Sequential(
             LeNet5.create_fc(fc1fin, fc1),
             relu,
-            torch.nn.Dropout(0.5),
+            torch.nn.Dropout(0.2),
             LeNet5.create_fc(fc1, fc2)
         )
 
