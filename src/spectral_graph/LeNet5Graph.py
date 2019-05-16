@@ -67,9 +67,7 @@ class NodeGraphConv(torch.nn.Linear):
         mx = values.max()
         self.act = modules.polynomial.LagrangeBasis.create(
             modules.polynomial.chebyshev.get_nodes(K, mn, mx)
-        )
-        self.poly = modules.polynomial.RegActivation(2, d_in//K, n_degree=3, zeros=False)
-        
+        )        
         print("Chebyshev nodes scaled to range [%.3f, %.3f]." % (values.min(), values.max()))
 
     def scale_laplacian(self, L):
@@ -104,12 +102,6 @@ class NodeGraphConv(torch.nn.Linear):
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # K*C, L*N
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
-        
-        sht = SparseMM().forward(self.L, X0) # C, L*N
-        sht = sht.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
-        sht = self.poly(sht) # N, C, L
-        out = sht.repeat(1, 1, self.K)
-        
         return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.MaxPool1d):
@@ -126,9 +118,9 @@ class LeNet5Graph(torch.nn.Module):
         node,
         D = 944, 
         cl1_f = 32,
-        cl1_k = 25,
+        cl1_k = 5,
         cl2_f = 64,
-        cl2_k = 25,
+        cl2_k = 5,
         fc1 = 512,
         fc2 = 10,
         gridsize = 28,
