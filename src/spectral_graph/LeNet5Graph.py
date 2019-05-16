@@ -99,7 +99,7 @@ class NodeGraphConv(torch.nn.Linear):
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # K*C, L*N
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
-        return super().forward(out).view(N*C, -1)
+        return super().forward(out).view(N, C, -1)
 
 class GraphMaxPool(torch.nn.AvgPool1d):
 
