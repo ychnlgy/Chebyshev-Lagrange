@@ -4,13 +4,16 @@ from . import chebyshev, LagrangeBasis
 
 class Activation(torch.nn.Module):
 
-    def __init__(self, input_size, n_degree, zeros=True):
+    def __init__(self, input_size, n_degree, zeros=False, a=None, b=None):
         super().__init__()
         self.d = input_size
         self.n = n_degree + 1
-        self.radius = self._calc_radius(self.n)
+
+        if a is None:
+            a = -self._calc_radius(self.n)
+            b = -a
         self.basis = LagrangeBasis.create(
-            chebyshev.get_nodes(self.n, -self.radius, self.radius)
+            chebyshev.get_nodes(self.n, a, b)
         )
         self.weight = torch.nn.Parameter(
             torch.zeros(1, self.d, self.n, 1)

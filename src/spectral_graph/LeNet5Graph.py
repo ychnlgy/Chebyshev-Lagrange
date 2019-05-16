@@ -65,15 +65,10 @@ class NodeGraphConv(torch.nn.Linear):
         values = self.L._values()
         mn = values.min()
         mx = values.max()
-        self.act1 = modules.polynomial.LagrangeBasis.create(
+        self.act = modules.polynomial.LagrangeBasis.create(
             modules.polynomial.chebyshev.get_nodes(K, mn, mx)
         )
-        self.act2 = modules.polynomial.LagrangeBasis.create(
-            modules.polynomial.chebyshev.get_nodes(5, mn, mx)
-        )
-##        self.act3 = modules.polynomial.LagrangeBasis.create(
-##            modules.polynomial.chebyshev.get_nodes(8, mn, mx)
-##        )
+        self.poly = modules.polynomial.Activation(d_in//K, n_degree=3, zeros=False, a=mn, b=mx)
         
         print("Chebyshev nodes scaled to range [%.3f, %.3f]." % (values.min(), values.max()))
 
@@ -102,17 +97,20 @@ class NodeGraphConv(torch.nn.Linear):
         assert pL_i.size(1) == pL_k.size(0)
         pL_i[0] += pL_k.to(device) * self.L.size(0)
         
-        pL_v1 = self.act1(self.L._values().unsqueeze(0)) # 1, n_laplacian, K
-        pL_v2 =  self.act2(self.L._values().unsqueeze(0)) # 1, n_laplacian, K//5
-        pL_v = (pL_v1+pL_v2.repeat(1, 1, 5)).view(-1)
+        pL_v = self.act(self.L._values().unsqueeze(0)) # 1, n_laplacian, K
+        pL_v = pL_v.view(-1)
         pL = torch.cuda.sparse.FloatTensor(pL_i, pL_v, torch.Size([self.K*C, C]))
         
         X0 = X.permute(1, 2, 0).contiguous().view(C, L*N)
         out = SparseMM().forward(pL, X0) # K*C, L*N
+        sht = SparseMM().forward(self.L, X0) # C, L*N
+        sht = sht.view(C, L, N).permute(2, 0, 1).view(N*C, L)
+        sht = self.poly(sht) # N, C, L
+        out = out + sht.repeat(1, 1, self.K)
         out = out.view(self.K, C, L, N).transpose(0, -1).contiguous().view(N*C, L*self.K)
         return super().forward(out).view(N, C, -1)
 
-class GraphMaxPool(torch.nn.AvgPool1d):
+class GraphMaxPool(torch.nn.MaxPool1d):
 
     def forward(self, X):
         X = X.permute(0, 2, 1).contiguous()
