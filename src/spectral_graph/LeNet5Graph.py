@@ -143,13 +143,13 @@ class LeNet5Graph(torch.nn.Module):
 
         self.cnn = torch.nn.Sequential(
             Branches([
-                self.create_conv(cl1_k, cl1_f, cl1_k, L[0]) for i in range(4)
+                self.create_conv(cl1_k, cl1_f, cl1_k, L[0]) for i in range(2)
             ]),
             relu,
             self.create_pool(),
 
             Branches([
-                self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]) for i in range(4)
+                self.create_conv(cl2_k*cl1_f, cl2_f, cl2_k, L[2]) for i in range(2)
             ]),
             relu,
             self.create_pool(),
