@@ -108,7 +108,7 @@ class NodeGraphConv(torch.nn.Linear):
         sht = SparseMM().forward(self.L, X0) # C, L*N
         sht = sht.view(C, L, N).permute(2, 0, 1).contiguous().view(N*C, L)
         sht = self.poly(sht) # N, C, L
-        out = out + sht.repeat(1, 1, self.K)
+        out = sht.repeat(1, 1, self.K)
         
         return super().forward(out).view(N, C, -1)
 
