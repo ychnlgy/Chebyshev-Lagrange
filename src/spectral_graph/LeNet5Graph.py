@@ -68,7 +68,7 @@ class NodeGraphConv(torch.nn.Linear):
         self.act = modules.polynomial.LagrangeBasis.create(
             modules.polynomial.chebyshev.get_nodes(K, mn, mx)
         )
-        self.poly = modules.polynomial.LinkActivation(2, d_in//K, n_degree=3, zeros=False)
+        self.poly = modules.polynomial.RegActivation(2, d_in//K, n_degree=3, zeros=False)
         
         print("Chebyshev nodes scaled to range [%.3f, %.3f]." % (values.min(), values.max()))
 
