@@ -1,0 +1,57 @@
+train.py --mnist 1 --act_type relu --use_shakeshake 0 --epochs 100
+Parameters: 1392938
+Final test accuracy: 99.74000
+train.py --mnist 1 --act_type regact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.69000
+train.py --mnist 0 --act_type relu --use_shakeshake 1 --epochs 100
+Parameters: 1393226
+Final test accuracy: 93.34000
+train.py --mnist 1 --act_type linkact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.66000
+train.py --mnist 1 --act_type relu --use_shakeshake 0 --epochs 100
+Parameters: 1392938
+Final test accuracy: 99.66000
+train.py --mnist 1 --act_type regact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.65000
+train.py --mnist 0 --act_type linkact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.71000
+train.py --mnist 0 --act_type relu --use_shakeshake 1 --epochs 100
+Parameters: 1393226
+Final test accuracy: 93.50000
+train.py --mnist 0 --act_type regact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.37000
+train.py --mnist 1 --act_type linkact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.69000
+train.py --mnist 1 --act_type relu --use_shakeshake 0 --epochs 100
+Parameters: 1392938
+Final test accuracy: 99.68000
+train.py --mnist 1 --act_type regact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.73000
+train.py --mnist 0 --act_type linkact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.29000
+train.py --mnist 0 --act_type relu --use_shakeshake 1 --epochs 100
+Parameters: 1393226
+Final test accuracy: 93.52000
+train.py --mnist 0 --act_type regact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.37000
+train.py --mnist 1 --act_type linkact --use_shakeshake 0 --epochs 100
+Parameters: 1398314
+Final test accuracy: 99.64000
+train.py --mnist 0 --act_type linkact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.35000
+train.py --mnist 0 --act_type linkact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.13000
+train.py --mnist 0 --act_type regact --use_shakeshake 1 --epochs 100
+Parameters: 1398602
+Final test accuracy: 93.31000

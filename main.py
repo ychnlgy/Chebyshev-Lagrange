@@ -1,30 +1,38 @@
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+import os, json
 
 import src
 
-HELP = '''
-
-ERROR: Option %s is not recognized.
-
-Please select from the following experiments:
-'''
-
 @src.util.main
-def main(experiment, **kwargs):
+def main(datanames, tiers, noise, N, repeat):
 
-    options = {
-        "spectralgraph-mnist": src.experiments.spectralgraph_mnist,
-    }
+    datanames = datanames.split(",")
+    tiers = tiers.split(",")
+    noise = float(noise)
+    N = int(N)
+    repeat = int(repeat)
 
-    if experiment not in options:
-        print(HELP % experiment)
-        for key, val in sorted(options.items()):
-            print(key, val.main.__doc__)
-
-        raise SystemExit(1)
-
-    options[experiment].main(**kwargs)
-
-    
-            
+    for _ in range(repeat):
+        for dataname in datanames:
+            dataset = src.toy.datasets.search(dataname)
+            for tier in tiers:
+                D = dataset.get_num_true_features()
+                
+                savedir = "results/%s/" % dataname
+                print("Output folder: %s" % savedir)
+                if not os.path.isdir(savedir):
+                    os.makedirs(savedir)
+                i = 0
+                make_savefile = lambda i: os.path.join(savedir, "%dN-%.2fn-%s-R%d.png" % (N, noise, tier, i))
+                savefile = make_savefile(i)
+                while os.path.isfile(savefile):
+                    i += 1
+                    savefile = make_savefile(i)
+                src.toy.main(
+                    dataname,
+                    savefile,
+                    tier=tier,
+                    D=D,
+                    N=N,
+                    noise = noise
+                )
+                

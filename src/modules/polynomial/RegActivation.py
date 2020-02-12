@@ -1,7 +1,7 @@
 import torch, math
 
 from . import Activation
-from .. import tensortools
+from .regress2d import regress2d
 
 class RegActivation(Activation):
 
@@ -42,7 +42,7 @@ class RegActivation(Activation):
 
     def calc_weight(self, slc, x, y):
         "Returns tensor of shape (D, 1)."
-        w, _ = tensortools.regress2d(x, y) # D, 1
+        w, _ = regress2d(x, y) # D, 1
         return w
 
     # === PRIVATE ===
@@ -58,8 +58,7 @@ class RegActivation(Activation):
         y = self.weight[0,:,slc,0] # D, d
         w = self.calc_weight(slc, x, y)
 
-        # we want the discontinuous function to
-        # still appear as continuous as possible,
+        # we want continuity,
         # so we connect the linear regression to
         # the last point at which the polynomial stops.
         b = y[:,endi].unsqueeze(-1)-w*x[:,endi].unsqueeze(-1)
