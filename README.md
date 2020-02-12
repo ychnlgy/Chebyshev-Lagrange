@@ -1,8 +1,8 @@
 # Original raw code for the Chebyshev-Lagrange experiments
 
-Dependencies include: python3, numpy, scipy, sklearn, torch, tqdm, matplotlib, pandas
+Code for replicating the experiments in [the original paper](https://arxiv.org/abs/1906.10064).
 
-These may not be comprehensive and the user is encouraged to install whatever seems to be missing.
+Dependencies include: python3, numpy, scipy, sklearn, torch, tqdm, matplotlib, pandas.
 
 Implementation files of immediate interest are:
  - [```src/modules/polynomial/chebyshev.py```](src/modules/polynomial/chebyshev.py) for the Chebyshev nodes.
